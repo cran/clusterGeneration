@@ -1,0 +1,338 @@
+\name{simClustDesign}
+\alias{simClustDesign}
+\title{DESIGN FOR RANDOM CLUSTER GENERATION WITH SPECIFIED DEGREE OF SEPARATION}
+\description{
+Generating data sets via a factorial design, which has factors: 
+degree of separation, number of clusters, number of non-noisy variables, 
+number of noisy variables. The separation between any cluster and its 
+nearest neighboring clusters can be set to a specified value. 
+The covariance matrices of clusters can have arbitrary diameters, shapes 
+and orientations.
+}
+\usage{
+simClustDesign(numClust=c(3,6,9), 
+  sepVal=c(0.01, 0.21, 0.342), 
+  sepLabels=c("L", "M", "H"), 
+  numNonNoisy=c(4,8,20), numNoisy=NULL, numOutlier=0, 
+  numReplicate=3, fileName="test", clustszind=2, 
+  clustSizeEq=50, rangeN=c(50,200), clustSizes=NULL,
+  covMethod=c("eigen", "unifcorrmat"), rangeVar=c(1, 10), 
+  lambdaLow=1, ratioLambda=10, rotateind=TRUE, 
+  iniProjDirMethod=c("SL", "naive"), 
+  projDirMethod=c("newton", "fixedpoint"), alpha=0.05, ITMAX=20, 
+  eps=1.0e-10, quiet=TRUE, outputEmpirical=TRUE, outputInfo=TRUE)
+}
+\arguments{
+  \item{numClust}{
+Vector of the number of clusters for data sets in the design.
+  }
+  \item{sepVal}{
+Vector of desired values of the separation index between clusters
+and their nearest neighboring clusters. Each element of \code{sepVal} can 
+take values within the interval \code{[-1, 1)}. 
+The closer to 1 an element of \code{sepVal} is, the more separated the 
+pair of clusters are.
+The values \eqn{0.01, 0.21, 0.34} are the values of the separation index for
+two univariate clusters generated from \eqn{N(0, 1)} and \eqn{N(0, A)},
+where \eqn{A=4, 6, 8}, respectively. \code{sepVal}\eqn{=0.01 (A=4)} indicates 
+a close cluster structure. \code{sepVal}\eqn{=0.21 (A=6)} indicates a 
+separated cluster structure. \code{sepVal}\eqn{=0.34 (A=8)} indicates 
+a well-separated cluster.
+  }
+  \item{sepLabels}{
+Labels for "close", "separated", and "well-separated" cluster structures.
+By default, "L" (low) means "close", "M" (medium) means "separated",
+"H" (high) means "well-separated".
+  }
+  \item{numNonNoisy}{
+Vector of the number of non-noisy variables.
+  }
+  \item{numNoisy}{
+Vectors of the number of noisy variables. The default value of \code{numNoisy} 
+is \code{NULL} so that the program can automatically assign the value of 
+\code{numNoisy} as a vector with elements \eqn{1, round(p1/2), p1}.
+  }
+  \item{numOutlier}{
+The number or ratio of outliers. If \code{numOutlier} is a 
+positive integer, then \code{numOutlier} means the number of outliers. 
+If \code{numOutlier} is a real number between \eqn{(0, 1)}, then 
+\code{numOutlier} means the ratio of outliers, i.e. the number of outliers 
+is equal to 
+\code{round}(\code{numOutlier}\eqn{*n_1}), where \eqn{n_1} is the total number 
+of non-outliers.  If \code{numOutlier} is a real number greater than \eqn{1}, 
+then \code{numOutlier} is rounded to an integer.
+  }
+  \item{numReplicate}{
+Number of data sets to be generated for the same cluster structure specified 
+by the other arguments of the function \code{genRandomClust}.
+The default value \eqn{3} follows the design in Milligan (1985).
+  }
+  \item{fileName}{
+The first part of the names of data files that record the generated data sets 
+and associated information, such as cluster membership of data points, labels 
+of noisy variables, separation index matrix, projection directions, etc. 
+(see details). The default value of \code{fileName} is \file{test}.
+  }
+  \item{clustszind}{
+Cluster size indicator.
+    \code{clustszind}\eqn{=1} indicates that all cluster have equal size. 
+          The size is specified by the argument \code{clustSizeEq}.
+    \code{clustszind}\eqn{=2} indicates that the cluster sizes are randomly 
+          generated from the range specified by the argument \code{rangeN}.
+    \code{clustszind}\eqn{=3} indicates that the cluster sizes are specified
+          via the vector \code{clustSizes}.
+The default value is \eqn{2} so that the generated clusters are more
+realistic.
+  }
+  \item{clustSizeEq}{
+Cluster size.
+If the argument \code{clustszind}\eqn{=1}, then all clusters will have the 
+equal number \code{clustSizeEq} of data points. The value of \code{clustSizeEq} should be large enough to get non-singular cluster covariance matrices. 
+We recommend the \code{clustSizeEq} is at least \eqn{10*p}, where \eqn{p} 
+is the total number of variables (including both non-noisy and noisy variables).
+The default value \eqn{100} is a reasonable cluster size.
+  }
+  \item{rangeN}{
+The range of cluster sizes.
+If \code{clustszind}\eqn{=2}, then cluster sizes will be randomly generated 
+from the range specified by \code{rangeN}. The lower bound of the number of 
+clusters should be large enough to get non-singular cluster covariance 
+matrices. We recommend the minimum cluster size is at least \eqn{10*p}, where 
+\eqn{p} is the total number of variables (including both non-noisy and noisy 
+variables).  The default range is \eqn{[50, 200]} which
+can produce reasonable variability of cluster sizes.
+  }
+  \item{clustSizes}{
+The sizes of clusters.
+If \code{clustszind}\eqn{=3}, then cluster sizes will be specified by the 
+vector \code{clustSizes}.  We recommend the minimum cluster size is at least 
+\eqn{10*p}, where \eqn{p} is the total number of variables (including both 
+non-noisy and noisy variables).
+The user needs to specify the value of \code{clustSizes}. Therefore, we
+set the default value of \code{clustSizes} as \code{NULL}.
+  }
+  \item{covMethod}{
+Method to generate covariance matrices for clusters (see details).
+The default method is 'eigen' so that the user can directly 
+specify the range of the \dfn{diameters} of clusters.
+  }
+  \item{rangeVar}{
+Range for variances of a covariance matrix (see details).
+The default range is \eqn{[1, 10]} which can generate reasonable
+variability of variances.
+  }
+  \item{lambdaLow}{
+Lower bound of the eigenvalues of cluster covariance matrices. 
+If the argument \code{covMethod="eigen"}, we need to generate eigenvalues for 
+cluster covariance matrices.
+The eigenvalues are randomly generated from the
+interval [\code{lambdaLow}, \code{lambdaLow}\eqn{*}\code{ratioLambda}]. 
+In our experience, \code{lambdaLow}\eqn{=1} and \code{ratioLambda}\eqn{=10} 
+can give reasonable variability of the diameters of clusters.
+\code{lambdaLow} should be positive.
+  }
+  \item{ratioLambda}{
+The ratio of the upper bound of the eigenvalues to the lower bound of the 
+eigenvalues of cluster covariance matrices. 
+If the argument \code{covMethod="eigen"}, we need to generate eigenvalues for 
+cluster covariance matrices.
+The eigenvalues are randomly generated from the
+interval [\code{lambdaLow}, \code{lambdaLow}\eqn{*}\code{ratioLambda}]. 
+In our experience, \code{lambdaLow}\eqn{=1} and \code{ratioLambda}\eqn{=10} 
+can give reasonable variability of the diameters of clusters.
+\code{ratioLambda} should be larger than \eqn{1}.
+  }
+  \item{rotateind}{
+Rotation indicator.
+\code{rotateind=TRUE} indicates randomly rotating data in non-noisy 
+dimensions so that we may not detect the full cluster structure from 
+pair-wise scatter plots of the variables.
+  }
+  \item{iniProjDirMethod}{
+Indicating the method to get initial projection direction when calculating
+the separation index between a pair of clusters (c.f. Qiu and Joe,
+2006a, 2006b). \cr
+\code{iniProjDirMethod}$=$\dQuote{SL}, the default, indicates the initial 
+projection direction is the sample version of the SL's projection direction 
+(Su and Liu, 1993, JASA)
+\eqn{\left(\boldsymbol{\Sigma}_1+\boldsymbol{\Sigma}_2\right)^{-1}\left(\boldsymbol{\mu}_2-\boldsymbol{\mu}_1\right)}\cr
+\code{iniProjDirMethod}$=$\dQuote{naive} indicates the initial projection 
+direction is \eqn{\boldsymbol{\mu}_2-\boldsymbol{\mu}_1}
+  }
+  \item{projDirMethod}{
+Indicating the method to get the optimal projection direction when calculating 
+the separation index between a pair of clusters (c.f. Qiu and Joe,
+2006a, 2006b). \cr
+\code{projDirMethod}$=$\dQuote{newton} indicates we use the modified
+Newton-Raphson method to search the optimal projection direction 
+(c.f. Qiu and Joe, 2006a). This requires the assumptions that both covariance 
+matrices of the pair of clusters are positive-definite. If this assumption 
+is violated, the \dQuote{fixedpoint} method could be used. The 
+\dQuote{fixedpoint} method iteratively searches the optimal projection 
+direction based on the first derivative of the separation index to the 
+projection direction (c.f. Qiu and Joe, 2006b).
+  }
+  \item{alpha}{
+Tuning parameter reflecting the percentage in the two
+tails of a projected cluster that might be outlying.
+We set \code{alpha}\eqn{=0.05} like we set
+the significance level in hypothesis testing as \eqn{0.05}.
+  }
+  \item{ITMAX}{
+Maximum iteration allowed when to iteratively calculating the
+optimal projection direction.
+The actual number of iterations is usually much less than the default value 20.
+  }
+  \item{eps}{
+Convergence threshold. A small positive number to check if a quantitiy \eqn{q} 
+is equal to zero.  If \eqn{|q|<}\code{eps}, then we regard \eqn{q} as equal 
+to zero.  \code{eps} is used to check if an algorithm converges.
+The default value is \eqn{1.0e-10}.
+  }
+  \item{quiet}{
+A flag to switch on/off the outputs of intermediate results and/or possible warning messages. The default value is \code{TRUE}.
+  }
+  \item{outputEmpirical}{
+Indicates if empirical separation indices and projection directions should be 
+calculated. This option is useful when generating clusters with sizes which 
+are not large enough so that the sample covariance matrices may be singular.
+Hence, by default, \code{outputEmpirical=TRUE}.
+  }
+  \item{outputInfo}{
+Indicates if theoretical and empirical separation information data frames 
+should be output to a file with format \file{[fileName]\_info.log}.
+  }
+}
+\details{
+The function \code{simClustDesign} is an implementation of the design for 
+generating random clusters proposed in Qiu and Joe (2006a). In the design, 
+the degree of separation between any cluster and its nearest neighboring 
+cluster could be set to a specified value while the cluster covariance 
+matrices can be arbitrary positive definite matrices, and so that clusters 
+generated might not be visualized by pair-wise scatterplots of variables. 
+The separation between a pair of clusters is measured by the separation index 
+proposed in Qiu and Joe (2006b).
+
+The current version of the function \code{simClustDesign} implements two 
+methods to generate covariance matrices for clusters. The first method, 
+denoted by \code{eigen}, first randomly generates eigenvalues 
+(\eqn{\lambda_1,\ldots>\lambda_p}) for the covariance matrix 
+(\eqn{\boldsymbol{\Sigma}}), then uses columns of a randomly generated 
+orthogonal matrix 
+(\eqn{\boldsymbol{Q}=(\boldsymbol{\alpha}_1,\ldots,\boldsymbol{\alpha}_p)}) 
+as eigenvectors. The covariance matrix 
+\eqn{\boldsymbol{\Sigma}} is then contructed as 
+\eqn{\boldsymbol{Q}*diag(\lambda_1,\dots,\lambda_p)*\boldsymbol{Q}^T}.
+The second method, denoted as \code{unifcorrmat}, first generates a random
+correlation matrix (\eqn{\boldsymbol{R}}) via the method proposed in Joe (2006),
+then randomly generates variances (\eqn{\sigma_1^2,\ldots, \sigma_p^2}) from 
+an interval specified by the argument \code{rangeVar}. The covariance matrix 
+\eqn{\boldsymbol{\Sigma}} is then constructed as 
+\eqn{diag(\sigma_1,\ldots,\sigma_p)*\boldsymbol{R}*diag(\sigma_1,\ldots,\sigma_p)}.
+
+For each data set generated, the function \code{simClustDesign} outputs
+four files: data file, log file, membership file, and noisy set file. 
+All four files have the same format: \cr
+\file{[fileName]J[j]G[g]v[p1]nv[p2]out[numOutlier]\_[numReplicate].[extension]} 
+\cr
+where \file{extension} can be \file{dat}, \file{log}, \file{mem}, or 
+\file{noisy}. \sQuote{J} indicates separation index, with \sQuote{j} 
+indicating the level of the factor \sQuote{separation index}; 
+\sQuote{G} indicates number of clusters, with \sQuote{g} indicating the 
+level of the factor \sQuote{number of clusters}; \sQuote{v} indicates 
+the number of non-noisy variables, with \sQuote{p1} indicating the level 
+of the factor \sQuote{number of non-noisy variables}; \sQuote{nv} indicates 
+the number of noisy variables, with \sQuote{p2} indicating the level of 
+the factor \sQuote{number of noisy variables}; \sQuote{out} indicates  
+number of outliers, with \sQuote{numOutlier} indicating the value of the 
+argument \code{numOutlier} of the function \code{simClustDesign}; 
+\sQuote{numReplicate} indicates the value of the argument \code{numReplicate} 
+of the function \code{simClustDesign}.
+
+The data file with file extension \file{dat} contains \eqn{n+1} rows and 
+\eqn{p} columns, where \eqn{n} is the number of data points and \eqn{p} is 
+the number of variables. The first row is the variable names. The log file 
+with file extension \file{log} contains information such as cluster sizes, 
+mean vectors, covariance matrices, projection directions, separation index 
+matrices, etc. The membership file with file extension \file{mem} contains 
+\eqn{n} rows and one column of cluster memberships for data points. The noisy 
+set file with file extension \file{noisy} contains a row of labels of noisy 
+variables.
+
+When generating clusters, population covariance matrices are all 
+positive-definite. However sample covariance matrices might be 
+semi-positive-definite due to small cluster sizes. In this case, the 
+function \code{genRandomClust} will automatically use the 
+\dQuote{fixedpoint} method to search the optimal projection direction.
+
+}
+\value{
+The function outputs four data files for each data set (see details).
+
+This function also returns separation information data frames 
+\code{infoFrameTheory} and \code{infoFrameData} based on population 
+and empirical mean vectors and covariance matrices of clusters for all 
+the data sets generated. Both \code{infoFrameTheory} and \code{infoFrameData} 
+contain the following seven columns:
+
+  \item{Column 1:}{
+Labels of clusters (\eqn{1, 2, \ldots, numClust}), where \eqn{numClust} 
+is the number of clusters for the data set.
+  }
+  \item{Column 2:}{
+Labels of the corresponding nearest neighbors.
+  }
+  \item{Column 3:}{
+Separation indices of the clusters to their nearest neighboring clusters.
+  }
+  \item{Column 4:}{
+Labels of the corresponding farthest neighboring clusters.
+  }
+  \item{Column 5:}{
+Separation indices of the clusters to their farthest neighbors.
+  }
+  \item{Column 6:}{
+Median separation indices of the clusters to their neighbors.
+  }
+  \item{Column 7:}{
+Data file names with format 
+\file{[fileName]J[j]G[g]v[p1]nv[p2]out[numOutlier]\_[numReplicate]} (see details).
+  }
+}
+\references{
+  Joe, H. (2006)
+  Generating Random Correlation Matrices Based on Partial Correlations. 
+  \emph{Journal of Multivariate Analysis}, \bold{97}, 2177--2189.
+
+  Milligan G. W. (1985) 
+  An Algorithm for Generating Artificial Test Clusters.
+  \emph{Psychometrika} \bold{50}, 123--127.
+
+  Qiu, W.-L. and Joe, H. (2006a)
+  Generation of Random Clusters with Specified Degree of Separaion.
+  \emph{Journal of Classification}, \bold{23}(2), 315-334.
+
+  Qiu, W.-L. and Joe, H. (2006b)
+  Separation Index and Partial Membership for Clustering.
+  \emph{Computational Statistics and Data Analysis}, \bold{50}, 585--603.
+
+  Su, J. Q. and Liu, J. S. (1993)
+  Linear Combinations of Multiple Diagnostic Markers.
+  \emph{Journal of the American Statistical Association}, \bold{88}, 1350--1355
+}
+\note{The speed of this function might be slow.}
+\author{
+Weiliang Qiu \email{stwxq@channing.harvard.edu}\cr
+Harry Joe \email{harry@stat.ubc.ca}
+}
+\examples{
+\dontrun{tmp<-simClustDesign(numClust=3, 
+              sepVal=c(0.01,0.21), 
+              sepLabels=c("L","M"), 
+              numNonNoisy=4, 
+              numOutlier=0, 
+              numReplicate=2, 
+              clustszind=2)}
+}
+\keyword{cluster}
+
