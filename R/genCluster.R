@@ -876,11 +876,20 @@ refineCov<-function(thetaMat, s, A, sepVal,
                         projDirMethod, alpha, ITMAX, eps, quiet)
     # find a suitable scalar myc such that the minimum separation index of
     # the cluster k.maxmin is equal to sepVal.
-    tmp<-uniroot(f=diffSepVal, lower=0.9, upper=myupper, 
+    newfit<-0
+    class(newfit)<-"try-error"
+    newfit<-try(
+         tmp<-uniroot(f=diffSepVal, lower=0.9, upper=myupper, 
       thetaMat=theta, s=Sigma, sepVal=sepVal, 
       iniProjDirMethod=iniProjDirMethod, projDirMethod=projDirMethod, 
       alpha=alpha, ITMAX=ITMAX, eps=eps, quiet=quiet)
-    myc<-tmp$root
+    )
+    if(sum(class(newfit)=="try-error"))
+    { warning("Could not find suitable upper bound of 'myc'!\n 'myc' is set to be 'myupper'!\n")
+      myc <-myupper 
+    } else {
+      myc<-tmp$root
+    }
     # scale the covariance matrix of the cluster k.maxmin so that the
     # minimum separation index of the cluster k.maxmin is equal to sepVal.
     s[,,k.maxmin]<-myc*s[,,k.maxmin]
@@ -2259,15 +2268,27 @@ getA<-function(A1, A2, vertex1, vertex2, Sigma1, Sigma2,
   {
     stop("The value of the quiet indicator 'quiet' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
   }
-
-  tmp<-uniroot(f=funSepVal, lower=A1, upper=A2, 
+  newfit<-0
+  class(newfit)<-"try-error"
+  
+  newfit<-try(
+         tmp<-uniroot(f=funSepVal, lower=A1, upper=A2, 
                vertex1=vertex1, vertex2=vertex2, Sigma1=Sigma1, 
                Sigma2=Sigma2, sepVal=sepVal, 
                iniProjDirMethod=iniProjDirMethod,
                projDirMethod=projDirMethod, alpha=alpha, 
                ITMAX=ITMAX, eps=eps, quiet=quiet)
-  A<-tmp$root
+  )
+  if(sum(class(newfit)=="try-error"))
+  { warning("Could not find suitable upper bound of 'myc'!\n 'myc' is set to be 'A2'!\n")
+    A <-A2
+  } else {
+    A<-tmp$root
+  }
   return(A)
+
+#  A<-tmp$root
+# return(A)
 }
 
 # given mui, Sigma1, Sigma2, first to calculate the separation index.
