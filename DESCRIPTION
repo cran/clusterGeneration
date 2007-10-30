@@ -1,6 +1,6 @@
 Package:	clusterGeneration
-Version:	1.2.1  
-Date:		2007-07-03
+Version:	1.2.4  
+Date:		2007-10-30
 Title:		random cluster generation (with specified degree of separation)
 Author:		Weiliang Qiu <stwxq@channing.harvard.edu>, 
 		Harry Joe <harry@stat.ubc.ca>.
@@ -16,4 +16,4 @@ Description:	The package contains functions for generating random
 		degree of separation, number of clusters,
 		number of variables, number of noisy variables. 
 License:	GPL version 2 or newer
-Packaged: Tue Jul  3 14:13:35 2007; stwxq
+Packaged: Tue Oct 30 15:25:42 2007; stwxq

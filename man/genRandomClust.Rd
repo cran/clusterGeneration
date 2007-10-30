@@ -8,16 +8,34 @@ set to a specified value. The covariance matrices of clusters can have
 arbitrary diameters, shapes and orientations.
 }
 \usage{
-genRandomClust(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0, 
-               numOutlier=0, numReplicate=3, fileName="test",  
-               clustszind=2, clustSizeEq=50, rangeN=c(50,200), 
-               clustSizes=NULL, covMethod=c("eigen", "unifcorrmat"), 
-               rangeVar=c(1, 10), lambdaLow=1, 
-               ratioLambda=10,  rotateind=TRUE, 
+genRandomClust(numClust, 
+               sepVal=0.01, 
+               numNonNoisy=2, 
+               numNoisy=0, 
+               numOutlier=0, 
+               numReplicate=3, 
+               fileName="test",  
+               clustszind=2, 
+               clustSizeEq=50, 
+               rangeN=c(50,200), 
+               clustSizes=NULL, 
+               covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
+               rangeVar=c(1, 10), 
+               lambdaLow=1, 
+               ratioLambda=10,  
+               alphad=1,
+               eta=1,
+               rotateind=TRUE, 
                iniProjDirMethod=c("SL", "naive"), 
-               projDirMethod=c("newton", "fixedpoint"), alpha=0.05, 
-               ITMAX=20, eps=1.0e-10, quiet=TRUE, 
-               outputEmpirical=TRUE, outputInfo=TRUE)
+               projDirMethod=c("newton", "fixedpoint"), 
+               alpha=0.05, 
+               ITMAX=20, 
+               eps=1.0e-10, 
+               quiet=TRUE, 
+               outputDatFlag=TRUE, 
+               outputLogFlag=TRUE, 
+               outputEmpirical=TRUE, 
+               outputInfo=TRUE)
 }
 \arguments{
   \item{numClust}{
@@ -135,6 +153,10 @@ In our experience, \code{lambdaLow}\eqn{=1} and \code{ratioLambda}\eqn{=10}
 can give reasonable variability of the diameters of clusters.
 \code{ratioLambda} should be larger than \eqn{1}.
   }
+  \item{alphad}{parameter for unifcorrmat method to generate random correlation matrix
+ $alphad=1$ for uniform. \code{alphad} should be positive.}
+  \item{eta}{parameter for \dQuote{c-vine} and \dQuote{onion} methods to generate random correlation matrix
+ $eta=1$ for uniform. \code{eta} should be positive.}
   \item{rotateind}{
 Rotation indicator.
 \code{rotateind=TRUE} indicates randomly rotating data in non-noisy 
@@ -184,6 +206,12 @@ The default value is \eqn{1.0e-10}.
   }
   \item{quiet}{
 A flag to switch on/off the outputs of intermediate results and/or possible warning messages. The default value is \code{TRUE}.
+  }
+  \item{outputDatFlag}{
+Indicates if data set should be output to file.
+  }
+  \item{outputLogFlag}{
+Indicates if log info should be output to file.
   }
   \item{outputEmpirical}{
 Indicates if empirical separation indices and projection directions should be 
@@ -244,6 +272,24 @@ semi-positive-definite due to small cluster sizes. In this case, the
 function \code{genRandomClust} will automatically use the 
 \dQuote{fixedpoint} method to search the optimal projection direction.
 
+The current version of the function \code{genPositiveDefMat} implements four 
+methods to generate random covariance matrices. The first method, denoted by 
+\dQuote{eigen}, first randomly generates eigenvalues 
+(\eqn{\lambda_1,\ldots,\lambda_p}) for the covariance matrix 
+(\eqn{\boldsymbol{\Sigma}}), then
+uses columns of a randomly generated orthogonal matrix 
+(\eqn{\boldsymbol{Q}=(\boldsymbol{\alpha}_1,\ldots,\boldsymbol{\alpha}_p)}) 
+as eigenvectors. The covariance matrix \eqn{\boldsymbol{\Sigma}} is then 
+contructed as 
+\eqn{\boldsymbol{Q}*diag(\lambda_1,\ldots,\lambda_p)*\boldsymbol{Q}^T}.
+
+The remaining methods, denoted as \dQuote{onion}, \dQuote{c-vine}, and \dQuote{unifcorrmat}
+respectively, first generates a random 
+correlation matrix (\eqn{\boldsymbol{R}}) via the method mentioned and proposed in Joe (2006),
+then randomly generates variances (\eqn{\sigma_1^2,\ldots,\sigma_p^2}) from 
+an interval specified by the argument \code{rangeVar}. The covariance matrix 
+\eqn{\boldsymbol{\Sigma}} is then constructed as 
+\eqn{diag(\sigma_1,\ldots,\sigma_p)*\boldsymbol{R}*diag(\sigma_1,\ldots,\sigma_p)}.
 }
 \value{
 The function outputs four data files for each data set (see details).
@@ -277,6 +323,19 @@ Median separation indices of the clusters to their neighbors.
 Data file names with format \file{[fileName]\_[i]}, where \eqn{i} indicates 
 the replicate number.
   }
+
+  The function also returns three lists: \code{datList}, \code{memList}, and \code{noisyList}.
+
+  \item{datList:}{
+    a list of data matrices for generated data sets.
+  }
+  \item{memList:}{
+    a list of luster memberships for data points for generated data sets.
+  }
+  \item{noisyList:}{
+    a list of sets of noisy variables for generated data sets.
+  }
+
 }
 \references{
   Joe, H. (2006)
@@ -298,6 +357,16 @@ the replicate number.
   Su, J. Q. and Liu, J. S. (1993)
   Linear Combinations of Multiple Diagnostic Markers.
   \emph{Journal of the American Statistical Association}, \bold{88}, 1350--1355.
+
+  Ghosh, S., Henderson, S. G. (2003).
+  Behavior of the NORTA method for correlated random vector generation
+  as the dimension increases.
+  \emph{ACM Transactions on Modeling and Computer Simulation (TOMACS)},
+  \bold{13(3)}, 276--294.
+
+  Kurowicka and Cooke, 2006.
+  \emph{Uncertainty Analysis with High Dimensional Dependence Modelling},
+  Wiley, 2006.
 }
 \note{This function might be take a while to complete.}
 \author{

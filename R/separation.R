@@ -214,6 +214,28 @@ sepIndexTheory<-function(projDir, mu1, Sigma1, mu2, Sigma2,
   return(d)
 }
 
+
+# Calculate separation index in one dimensional space, 
+# given projected means and variances.
+# make sure mu2>mu1 before using this function
+# mu1, tau1 -- mle of the mean and standard devitation of cluster 1
+# mu2, tau2 -- mle of mean and standard devitation of cluster 2
+# alpha -- tuning parameter
+sepIndex<-function(mu1, tau1, mu2, tau2, alpha=0.05, eps=1.0e-10)
+{ Za<-qnorm(1-alpha/2) 
+  L1<-mu1-Za*tau1; U1<-mu1+Za*tau1;
+  L2<-mu2-Za*tau2; U2<-mu2+Za*tau2;
+  denom<-U2-L1
+  if(abs(denom)<eps)
+  { sepVal<- -1 }
+  else
+  {
+    sepVal<-(L2-U1)/(U2-L1); 
+  }
+  intercept<-(U1+L2)/2;
+  return(list(sepVal=sepVal,intercept=intercept,L1=L1,U1=U1,L2=L2,U2=U2))
+}
+
 # Calculate the value of the separation index (data version)
 # given a projection direction 'projDir'
 # y1 -- data for cluster 1
@@ -829,19 +851,90 @@ getSepProjTheory<-function(muMat, SigmaArray,
     for(j in 1:(i-1))
     { muj<-muMat[j,]
       sj<-SigmaArray[,,j]
-      # get the initial projection direction
-      iniProjDir<-getIniProjDirTheory(mui, si, muj, sj, 
-                                      iniProjDirMethod, eps, quiet)
-      # get the projection direction
-      tmpa<-projDirTheory(iniProjDir,  mui, si, muj, sj, 
-                          projDirMethod, alpha, ITMAX, eps, quiet)
-      a<-tmpa$projDir
+
+      #**** begin 1 WQ 09/22/2007
+      # in case some variances are equal to zero
+      dsi<-as.numeric(diag(si))
+      dsj<-as.numeric(diag(sj))
+      tmppos<-which(abs(dsi-dsj)<eps)
+      if(length(tmppos)>0)
+      {
+        # if difference of means is also equal to zero, then this dimension is noisy
+        # we should set the corresonding elements in the projection direction as zero
+        myset<-1:p
+        # variables have zero variances in both clusters
+        myset2<-myset[tmppos]
+        diffmu<-abs(mui-muj)
+
+        diffmu2<-diffmu[myset2]
+        tmppos2<-which(diffmu2<eps)
+
+        tmpn<-length(diffmu2)
+        tmplen<-length(tmppos2)
+        if(tmplen>0 && tmplen==tmpn) 
+        {
+          if(tmpn==p)
+          { # all varialbes are noisy, i.e., the points in the two clusters have
+            # the same coordinates.
+            # then any projection direction will produce the same results.
+            # So we set the optimal direction as (1,0,0,0...0)
+            a<-rep(0, p)
+            a[1]<-1
+            tmpaSepVal<- -1
+          } else if(tmpn==(p-1)) {
+            # only one variable is non-noisy
+            myset3<-myset[-tmppos]
+            a<-rep(0, p)
+            a[myset3]<-1
+            nui<-mui[myset3]
+            nuj<-muj[myset3]
+            taui<-si[myset3, myset3]
+            tauj<-sj[myset3, myset3]
+            tmpaSepVal<-sepIndex(nui, taui, nuj, tauj, alpha, eps)
+          } else { # we get projection direction for other dimensions
+            myset3<-myset[-tmppos] 
+            nui<-mui[myset3]
+            nuj<-muj[myset3]
+            taui<-si[myset3, myset3]
+            tauj<-sj[myset3, myset3]
+          
+            # get the initial projection direction
+            iniProjDir<-getIniProjDirTheory(nui, taui, nuj, tauj, 
+                                            iniProjDirMethod, eps, quiet)
+            # get the projection direction
+            tmpa<-projDirTheory(iniProjDir,  nui, taui, nuj, tauj, 
+                                projDirMethod, alpha, ITMAX, eps, quiet)
+            a2<-tmpa$projDir
+            tmpaSepVal<-tmpa$sepVal
+          
+            a<-rep(0, p)
+            a[myset3]<-a2
+          }
+        }  else { # some variables are non-noisy, some variable are noisy
+          # we choose a dimension has the maximum separation
+          tmppos3<-which(diffmu2==max(diffmu2))[1]
+          mydim<-myset2[tmppos3]
+          a<-rep(0, tmpn) 
+          a[mydim]<-1
+          tmpaSepVal<-1
+        }
+      } else { # In all variables, variance of two clusters are not all equal to zero
+
+        # get the initial projection direction
+        iniProjDir<-getIniProjDirTheory(mui, si, muj, sj, 
+                                        iniProjDirMethod, eps, quiet)
+        # get the projection direction
+        tmpa<-projDirTheory(iniProjDir,  mui, si, muj, sj, 
+                            projDirMethod, alpha, ITMAX, eps, quiet)
+        a<-tmpa$projDir
+        tmpaSepVal<-tmpa$sepVal
+      }
       projDirArray[i,j,]<-a
       projDirArray[j,i,]<- -a
       # get the separation index
-      tmpaSepVal<-tmpa$sepVal
       sepValMat[i,j]<-tmpaSepVal
       sepValMat[j,i]<-tmpaSepVal
+      #**** end 1 WQ 09/22/2007
     }
   }
   return(list(sepValMat=sepValMat, projDirArray=projDirArray))

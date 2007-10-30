@@ -136,6 +136,19 @@
 #           partial correlations. J. Mult. Anal. Vol. 97, 2177--2189
 #          Then, it generate variances from the range 'rangeVar' to
 #          construct the covariance matrix. 
+#      'onion' method
+# extension of onion method, using Cholesky instead of msqrt
+#Ghosh, S., Henderson, S. G. (2003). Behavior of the NORTA method for
+#correlated random vector generation as the dimension increases.
+#ACM Transactions on Modeling and Computer Simulation (TOMACS)
+#v 13 (3), 276-294.
+#
+#      'c-vine' method
+#      # Random correlation with the C-vine (different order of partial
+# correlations). Reference for vines: Kurowicka and Cooke, 2006,
+# Uncertainty Analysis with High Dimensional Dependence Modelling,
+# Wiley, 2006.
+
 #      The default method is 'eigen' so that the user can directly 
 #      specify the range of the 'diameters' of clusters.
 # rangeVar -- if 'covMethod="unifcorrmat"', then to generate a covariance 
@@ -154,6 +167,10 @@
 #      and lambdaLow is the lower bound.
 #      In our experience, the range [lambdaLow=1, lambdaUpp=10]
 #      can give reasonable variability of the diameters of clusters.
+# alphad -- parameter for c-vine and onion method to generate random correlation matrix
+#       eta=1 for uniform. eta should be > 0
+# eta -- parameter for c-vine and onion method to generate random correlation matrix
+#       eta=1 for uniform. eta should be > 0
 # rotateind-- if rotateind =TRUE, then rotate data so that we may not detect the
 #      full cluster structure from scatterplots, otherwise do not rotate.
 #      By default, 'rotateind=TRUE' to generate more realistic data sets.
@@ -191,20 +208,38 @@
 # outputInfo -- indicates if separation information dataframe should be output.
 #      The file name has the format [fileName]_info.log
 #############
-genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0, 
-               numOutlier=0, numReplicate=3, fileName="test",  
-               clustszind=2, clustSizeEq=50, rangeN=c(50,200), 
-               clustSizes=NULL, covMethod=c("eigen", "unifcorrmat"), 
-               rangeVar=c(1, 10), lambdaLow=1, 
-               ratioLambda=10,  rotateind=TRUE, 
-               iniProjDirMethod=c("SL", "naive"), 
-               projDirMethod=c("newton", "fixedpoint"), alpha=0.05, 
-               ITMAX=20, eps=1.0e-10, quiet=TRUE, 
-               outputEmpirical=TRUE, outputInfo=TRUE)
+genRandomClust<-function(numClust, 
+                         sepVal=0.01, 
+                         numNonNoisy=2, 
+                         numNoisy=0, 
+                         numOutlier=0, 
+                         numReplicate=3, 
+                         fileName="test",  
+                         clustszind=2, 
+                         clustSizeEq=50, 
+                         rangeN=c(50,200), 
+                         clustSizes=NULL, 
+                         covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
+                         rangeVar=c(1, 10), 
+                         lambdaLow=1, 
+                         ratioLambda=10,  
+                         alphad=1,
+                         eta=1,
+                         rotateind=TRUE, 
+                         iniProjDirMethod=c("SL", "naive"), 
+                         projDirMethod=c("newton", "fixedpoint"), 
+                         alpha=0.05, 
+                         ITMAX=20, 
+                         eps=1.0e-10, 
+                         quiet=TRUE, 
+                         outputDatFlag=TRUE,
+                         outputLogFlag=TRUE,
+                         outputEmpirical=TRUE, 
+                         outputInfo=TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
-  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "unifcorrmat"))
+  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "onion", "c-vine", "unifcorrmat"))
   numClust<-as.integer(numClust)
 
   # checks for valid inputs
@@ -290,6 +325,17 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
   { 
     stop("The ratio 'ratioLambda' of the upper bound of the eigenvalues to the lower bound of the eigenvalues of cluster covariance matrices should be greater than 1!\n")
   }
+  alphad<-as.numeric(alphad)
+  if(alphad<0)
+  {
+    stop("'alphad' should be positive!\n")
+  }
+  eta<-as.numeric(eta)
+  if(eta<0)
+  {
+    stop("'eta' should be positive!\n")
+  }
+
   if(!is.logical(rotateind))
   {
     stop("The value of the rotation indicator 'rotateind' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
@@ -310,6 +356,14 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
   if(!is.logical(quiet))
   {
     stop("The value of the quiet indicator 'quiet' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
+  }
+  if(!is.logical(outputDatFlag))
+  {
+    stop("The value of the indicator 'outputDatFlag' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
+  }
+  if(!is.logical(outputLogFlag))
+  {
+    stop("The value of the indicator 'outputLogFlag' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
   }
   if(!is.logical(outputEmpirical))
   {
@@ -352,7 +406,7 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
     # generate covariance matrices
     tmpms<-genMeanCov(numNonNoisy,numClust,
                       rangeVar, sepVal, lambdaLow,
-                      ratioLambda, covMethod,
+                      ratioLambda, covMethod, alphad, eta, 
                       iniProjDirMethod, projDirMethod, 
                       alpha, ITMAX, eps, quiet) 
     #generate mean and cov
@@ -384,7 +438,7 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
     mypi<-size/sum(size)
     # Obtain the mean vector and covariance matrix for noisy variables
     tmp<-genNoisyMeanCov(numNoisy, mypi, numClust, numNonNoisy, 
-                         thetaMat, s, covMethod, rangeVar, 
+                         thetaMat, s, covMethod, alphad, eta, rangeVar, 
                          eps, quiet)
     # 'thetaMat' is a 'numClust' by 'p' matrix 
     # i-th row is the mean vector for the i-th cluster
@@ -439,7 +493,10 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
       # 'empProjDir[i,j,]' is the projection direction for clusters i and j
       empProjDir<-tmp$projDirArray
     } 
-    else { empProjDir<-NULL }
+    else { 
+      empProjDir<-NULL 
+      Jhat2<-NULL
+    }
 
     if(!quiet)
     { cat(" *********** data set >> ", datafileName, " *************\n")
@@ -463,41 +520,61 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
       cat(" *** Step 2.6: Output log information ***\n") 
     }
     # output log information, e.g. mean vectors and covariance matrices, etc.
-    outputLog(b, fileName, alpha, sepVal, numClust, size,
-      N, p, numNoisy, noisySet, nOut, thetaMat, s, muMat, SigmaArray, Q, 
-      sepValMat, Jhat2, myprojDir, empProjDir, egvaluesMat, 
-      quiet, outputEmpirical) 
+    if(outputLogFlag)
+    { outputLog(b, fileName, alpha, sepVal, numClust, size,
+        N, p, numNoisy, noisySet, nOut, thetaMat, s, muMat, SigmaArray, Q, 
+        sepValMat, Jhat2, myprojDir, empProjDir, egvaluesMat, 
+        quiet, outputEmpirical) 
+    }
     # output data set
-    outputData(b, fileName, y, p)
+
     # output membership
-    memfileName<-paste(fileName, "_", b, ".mem", sep="") #membership
-    write.table(mem,file=memfileName,quote=FALSE,
+    if(outputDatFlag)
+    { memfileName<-paste(fileName, "_", b, ".mem", sep="") #membership
+      write.table(mem,file=memfileName,quote=FALSE,
                 row.names=FALSE,col.names=FALSE)
+    }
 
     # output noisy variables
-    noisyfileName<-paste(fileName, "_",b,".noisy",sep="") #noisy var
-    write.table(t(noisySet),file=noisyfileName,
+    if(outputDatFlag)
+    { noisyfileName<-paste(fileName, "_",b,".noisy",sep="") #noisy var
+      write.table(t(noisySet),file=noisyfileName,
                   quote=FALSE,row.names=FALSE,
-      col.names=FALSE)
+                  col.names=FALSE)
+    }
 
     # record theoretical and sample separation indices
     infoMatTheory<-neighbors.mat
-    # for empirical values, we get the corresponding 'numClust' by '6' matrix
-    infoMatData<-nearestNeighborSepVal(Jhat2) 
+    if(outputEmpirical)
+    { # for empirical values, we get the corresponding 'numClust' by '6' matrix
+      infoMatData<-nearestNeighborSepVal(Jhat2) 
+    } else {
+      infoMatData<-NULL
+    }
 
     nn<-nrow(infoMatTheory)
     
-    if(b==1) 
-    { # the first data set
-      infoFrameTheory<-infoMatTheory
-      infoFrameData<- infoMatData
-      fileNameVec<-rep(paste(fileName, "_", b, sep=""), nn)
-    } 
-    else  
+    if(b>1)  
     { infoFrameTheory<-rbind(infoFrameTheory, infoMatTheory)
-      infoFrameData<-rbind(infoFrameData, infoMatData)
+      if(outputEmpirical)
+      { infoFrameData<-rbind(infoFrameData, infoMatData) }
+      else { infoFrameData<-NULL }
       fileNameVec<-c(fileNameVec, rep(paste(fileName, "_", b, sep=""), nn))
-    }
+
+      datList[[b]]<-outputData(b, fileName, y, p, outputDatFlag) 
+      memList[[b]]<-mem 
+      noisyList[[b]]<-noisySet 
+    } else { # the first data set
+      infoFrameTheory<-infoMatTheory
+      if(outputEmpirical)
+      { infoFrameData<- infoMatData }
+      else { infoFrameData<-NULL }
+      fileNameVec<-rep(paste(fileName, "_", b, sep=""), nn)
+      datList<-list(outputData(b, fileName, y, p, outputDatFlag)) 
+      memList<-list(mem)
+      noisyList<-list(noisySet)
+    } 
+ 
   }
   infoFrameTheory<-data.frame(cluster=infoFrameTheory[,1],
                       nearestClust=infoFrameTheory[,2],
@@ -506,13 +583,23 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
                       farthestSep=infoFrameTheory[,5], 
                       medianSep=infoFrameTheory[,6])
   infoFrameTheory$fileName<-fileNameVec
-  infoFrameData<-data.frame(cluster=infoFrameData[,1],
+  if(outputEmpirical)
+  { infoFrameData<-data.frame(cluster=infoFrameData[,1],
                       nearestClust=infoFrameData[,2],
                       nearestSep=infoFrameData[,3], 
                       farthestClust=infoFrameData[,4],
                       farthestSep=infoFrameData[,5], 
                       medianSep=infoFrameData[,6])
-  infoFrameData$fileName<-fileNameVec
+    infoFrameData$fileName<-fileNameVec
+  } else {
+    infoFrameData<-NULL
+  }
+
+  tmpnames<-paste(fileName, "_", 1:numReplicate, sep="")
+  names(datList)<-tmpnames
+  names(memList)<-tmpnames
+  names(noisyList)<-tmpnames
+
   if(outputInfo)
   { fileNameInfo<-paste(fileName, "_info.log", sep="")
     msg<-"Theoretical separation information data frame>>>>>>>>>>>\n"
@@ -530,17 +617,20 @@ genRandomClust<-function(numClust, sepVal=0.01, numNonNoisy=2, numNoisy=0,
                 row.names=FALSE, col.names=FALSE)
     msg<-colnames(infoFrameData)
     write(msg, append=TRUE, file=fileNameInfo, ncolumns=7)
-    tt<-infoFrameData
-    tt[,1:6]<-round(tt[,1:6], 3)
-    write.table(tt, file=fileNameInfo, quote=FALSE, sep="\t",
+    if(outputEmpirical)
+    { tt<-infoFrameData
+      tt[,1:6]<-round(tt[,1:6], 3)
+      write.table(tt, file=fileNameInfo, quote=FALSE, sep="\t",
                 row.names=FALSE, col.names=FALSE, append=TRUE)
+    }
   }
   if(!quiet)
   { 
     cat(" *********** End of generating ", numReplicate, " data sets *************\n")
   }
 
-  return(list(infoFrameTheory=infoFrameTheory, infoFrameData=infoFrameData))
+  invisible(list(infoFrameTheory=infoFrameTheory, infoFrameData=infoFrameData,
+                 datList=datList, memList=memList, noisyList=noisyList))
 }
 
 # Get numNonNoisy+1 vertexs of a simplex in numNonNoisy dimension
@@ -635,12 +725,12 @@ genShiftedVertexes<-function(G, numNonNoisy)
 # rangeVar, sepVal, lambdaLow, ratioLambda, covMethod, iniProjDirMethod, 
 # projDirMethod, alpha, ITMAX, eps, quiet
 genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1, 
-                     ratioLambda=10, covMethod=c("eigen", "unifcorrmat"),
-                     iniProjDirMethod=c("SL", "naive"), 
+                     ratioLambda=10, covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"),
+                     alphad=1, eta=1, iniProjDirMethod=c("SL", "naive"), 
                      projDirMethod=c("newton", "fixedpoint"),
                      alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
 { 
-  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "unifcorrmat"))
+  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "onion", "c-vine", "unifcorrmat"))
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
   numNonNoisy<-as.integer(numNonNoisy)
@@ -703,7 +793,7 @@ genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1,
   { thetaMat<-matrix(0, nrow=1, ncol=numNonNoisy)
     rownames(thetaMat)<-"cluster1"
     colnames(thetaMat)<-paste("variable", 1:numNonNoisy, "\n")
-    tmp<-genPositiveDefMat(numNonNoisy, covMethod, rangeVar, 
+    tmp<-genPositiveDefMat(numNonNoisy, covMethod, alphad, eta, rangeVar, 
          lambdaLow, ratioLambda)
     s[,,1]<-tmp$Sigma
     egvaluesMat[1,]<-tmp$egvalue
@@ -723,7 +813,7 @@ genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1,
     a[1]<-1
     asa<-rep(0, G); # sqrt(a^T s a)
     for(i in 1:G) # generate covariance matrices
-    { tmp<-genPositiveDefMat(numNonNoisy, covMethod, rangeVar, lambdaLow, ratioLambda) 
+    { tmp<-genPositiveDefMat(numNonNoisy, covMethod, alphad, eta, rangeVar, lambdaLow, ratioLambda) 
       s[,,i]<-tmp$Sigma
       asa[i]<-sqrt(as.vector(t(a)%*%s[,,i]%*%a)) # the sd of projected data
       egvaluesMat[i,]<-tmp$egvalues
@@ -1388,7 +1478,7 @@ genMemSize<-function(clustszind, G, clustSizeEq, rangeN, clustSizes, p, quiet=TR
 #      for the i-th cluster
 # See documentation of genRandomClust for explanation of arguments:
 # covMethod, rangeVar, eps, quiet
-genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod, rangeVar, eps=1.0e-10, quiet=TRUE)
+genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod, alphad, eta, rangeVar, eps=1.0e-10, quiet=TRUE)
 { 
   numNoisy<-as.integer(numNoisy)
   if(numNoisy<0 || !is.integer(numNoisy)) 
@@ -1451,7 +1541,7 @@ genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod
   # Generate the covariance matrix of noisy variables
   low<-range.eg[1]; upp<-range.eg[2]; 
   # obtain covariance matrices
-  tmp<-genPositiveDefMat(p2, covMethod, rangeVar, low, upp/low) 
+  tmp<-genPositiveDefMat(p2, covMethod, alphad, eta, rangeVar, low, upp/low) 
   s.noisy<-tmp$Sigma # obtain covariance matrices
   p<-numNonNoisy+p2 # total number of variables
   # update the mean vectors and covariance matirces
@@ -1968,10 +2058,14 @@ outputLogSepProjData<-function(logfileName,G,alpha, Jhat2,empProjDir)
 # fileName -- the first part of the name of the data set
 # y -- Nxp data matrix
 # p -- the total number of variables
-outputData<-function(b, fileName, y, p)
+outputData<-function(b, fileName, y, p, outputDatFlag=TRUE)
 { tem<-paste("x", 1:p, sep="")
-  datafileName<-paste(fileName, "_", b, ".dat", sep="")
-  write.table(y,file=datafileName,quote=FALSE,row.names=FALSE,col.names=tem)
+  if(outputDatFlag)
+  { datafileName<-paste(fileName, "_", b, ".dat", sep="")
+    write.table(y,file=datafileName,quote=FALSE,row.names=FALSE,col.names=tem)
+  }
+  colnames(y)<-tem
+  return(y)
 }
 
 
@@ -2003,11 +2097,12 @@ outputData<-function(b, fileName, y, p)
 #      In our experience, the range [lambdaLow=1, lambdaUpp=10]
 #      can give reasonable variability of the diameters of clusters.
 # dim -- the dimension of this positive definite matrix
-genPositiveDefMat<-function(dim, covMethod=c("eigen", "unifcorrmat"), 
+genPositiveDefMat<-function(dim, covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
+                            alphad=1, eta=1,
                             rangeVar=c(1,10), 
                             lambdaLow=1, ratioLambda=10)
 { 
-  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "unifcorrmat"))
+  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "onion", "c-vine", "unifcorrmat"))
   if(rangeVar[1]>rangeVar[2]) 
   { 
     stop("First element of 'rangeVar' should be smaller than second!\n")
@@ -2041,6 +2136,33 @@ genPositiveDefMat<-function(dim, covMethod=c("eigen", "unifcorrmat"),
       Sigma<-Q%*%u%*%t(Q) # the final positive definite matrix
     }
   } 
+  else if (covMethod=="onion") {
+    # use 'onion' method for random correlation matrix
+    # and uniform distributions for random variances 
+    # Reference: 
+    # Joe H (2006). Generating random correlation matrices based on partial
+    # correlations. J. Mult. Anal. Vol. 97, 2177--2189
+    rr<-rcoronion(dim,eta)
+    sigma2<-runif(dim, min=rangeVar[1], max=rangeVar[2])
+    if(dim>1) { dd<-diag(sqrt(sigma2)) }
+    else { dd<-sqrt(sigma2) }
+    Sigma<-dd%*%rr%*%dd
+    egvalues<-eigen(Sigma)$values
+
+  }
+  else if (covMethod=="c-vine"){
+    # use 'c-vine' method for random correlation matrix
+    # and uniform distributions for random variances 
+    # Reference: 
+    # Joe H (2006). Generating random correlation matrices based on partial
+    # correlations. J. Mult. Anal. Vol. 97, 2177--2189
+    rr<-rcorcvine(dim, eta)
+    sigma2<-runif(dim, min=rangeVar[1], max=rangeVar[2])
+    if(dim>1) { dd<-diag(sqrt(sigma2)) }
+    else { dd<-sqrt(sigma2) }
+    Sigma<-dd%*%rr%*%dd
+    egvalues<-eigen(Sigma)$values
+  }
   else 
   { # use hjrancor.R for random correlation matrix
     # and uniform distributions for random variances 

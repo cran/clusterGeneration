@@ -75,6 +75,20 @@
 #           partial correlations. J. Mult. Anal. Vol. 97, 2177--2189
 #          Then, it generate variances from the range 'rangeVar' to
 #          construct the covariance matrix. 
+#
+#      'onion' method
+# extension of onion method, using Cholesky instead of msqrt
+#Ghosh, S., Henderson, S. G. (2003). Behavior of the NORTA method for
+#correlated random vector generation as the dimension increases.
+#ACM Transactions on Modeling and Computer Simulation (TOMACS)
+#v 13 (3), 276-294.
+#
+#      'c-vine' method
+#      # Random correlation with the C-vine (different order of partial
+# correlations). Reference for vines: Kurowicka and Cooke, 2006,
+# Uncertainty Analysis with High Dimensional Dependence Modelling,
+# Wiley, 2006.
+#
 #      The default method is 'eigen' so that the user can directly 
 #      specify the range of the 'diameters' of clusters.
 # rangeVar -- if 'covMethod="unifcorrmat"', then to generate a covariance 
@@ -93,6 +107,10 @@
 #      and lambdaLow is the lower bound.
 #      In our experience, the range [lambdaLow=1, lambdaUpp=10]
 #      can give reasonable variability of the diameters of clusters.
+# alphad -- parameter for c-vine and onion method to generate random correlation matrix
+#       eta=1 for uniform. eta should be > 0
+# eta -- parameter for c-vine and onion method to generate random correlation matrix
+#       eta=1 for uniform. eta should be > 0
 # rotateind-- if rotateind =TRUE, then rotate data so that we may not detect the
 #      full cluster structure from scatterplots, otherwise do not rotate.
 #      By default, 'rotateind=TRUE' to generate more realistic data sets.
@@ -130,20 +148,38 @@
 # outputInfo -- indicates if separation information dataframe should be output.
 #      The file name extension is .log
 simClustDesign<-function(numClust=c(3,6,9), 
-  sepVal=c(0.01, 0.21, 0.342), 
-  sepLabels=c("L", "M", "H"), 
-  numNonNoisy=c(4,8,20), numNoisy=NULL, numOutlier=0, 
-  numReplicate=3, fileName="test", clustszind=2, 
-  clustSizeEq=50, rangeN=c(50,200), clustSizes=NULL,
-  covMethod=c("eigen", "unifcorrmat"), rangeVar=c(1, 10), 
-  lambdaLow=1, ratioLambda=10, rotateind=TRUE, 
-  iniProjDirMethod=c("SL", "naive"), 
-  projDirMethod=c("newton", "fixedpoint"), alpha=0.05, ITMAX=20, 
-  eps=1.0e-10, quiet=TRUE, outputEmpirical=TRUE, outputInfo=TRUE)
+                         sepVal=c(0.01, 0.21, 0.342), 
+                         sepLabels=c("L", "M", "H"), 
+                         numNonNoisy=c(4,8,20), 
+                         numNoisy=NULL, 
+                         numOutlier=0, 
+                         numReplicate=3, 
+                         fileName="test", 
+                         clustszind=2, 
+                         clustSizeEq=50, 
+                         rangeN=c(50,200), 
+                         clustSizes=NULL,
+                         covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
+                         rangeVar=c(1, 10), 
+                         lambdaLow=1, 
+                         ratioLambda=10, 
+                         alphad=1, 
+                         eta=1, 
+                         rotateind=TRUE, 
+                         iniProjDirMethod=c("SL", "naive"), 
+                         projDirMethod=c("newton", "fixedpoint"), 
+                         alpha=0.05, 
+                         ITMAX=20, 
+                         eps=1.0e-10, 
+                         quiet=TRUE, 
+                         outputDatFlag=TRUE,
+                         outputLogFlag=TRUE,
+                         outputEmpirical=TRUE, 
+                         outputInfo=TRUE)
 {
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
-  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "unifcorrmat"))
+  covMethod<-match.arg(arg=covMethod, choices=c("eigen", "onion", "c-vine", "unifcorrmat"))
   numClust<-as.integer(numClust)
 
   # checks for valid inputs
@@ -232,6 +268,17 @@ simClustDesign<-function(numClust=c(3,6,9),
   { 
     stop("The ratio 'ratioLambda' of the upper bound of the eigenvalues to the lower bound of the eigenvalues of cluster covariance matrices should be greater than 1!\n")
   }
+  alphad<-as.numeric(alphad)
+  if(alphad<0)
+  {
+    stop("'alphad' should be positive!\n")
+  }
+  eta<-as.numeric(eta)
+  if(eta<0)
+  {
+    stop("'eta' should be positive!\n")
+  }
+
   if(!is.logical(rotateind))
   {
     stop("The value of the rotation indicator 'rotateind' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
@@ -252,6 +299,14 @@ simClustDesign<-function(numClust=c(3,6,9),
   if(!is.logical(quiet))
   {
     stop("The value of the quiet indicator 'quiet' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
+  }
+  if(!is.logical(outputDatFlag))
+  {
+    stop("The value of the indicator 'outputDatFlag' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
+  }
+  if(!is.logical(outputLogFlag))
+  {
+    stop("The value of the indicator 'outputLogFlag' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
   }
   if(!is.logical(outputEmpirical))
   {
@@ -286,16 +341,30 @@ simClustDesign<-function(numClust=c(3,6,9),
                iniProjDirMethod=iniProjDirMethod, 
                projDirMethod=projDirMethod, alpha=alpha, 
                ITMAX=ITMAX, eps=eps, quiet=quiet, 
-               outputEmpirical=outputEmpirical, outputInfo=FALSE)
+               outputDatFlag=outputDatFlag,
+               outputLogFlag=outputLogFlag,
+               outputEmpirical=outputEmpirical, 
+               outputInfo=FALSE)
 
-          if(loop==1)
-          { infoFrameTheory<-res$infoFrameTheory
-            infoFrameData<-res$infoFrameData
-          } 
-          else 
+          if(loop>1) 
           { infoFrameTheory<-rbind(infoFrameTheory, res$infoFrameTheory)
-            infoFrameData<-rbind(infoFrameData, res$infoFrameData)
-          }
+            if(outputEmpirical)
+            { infoFrameData<-rbind(infoFrameData, res$infoFrameData) }
+            else { infoFrameData<-NULL }
+            datList[[loop]]<-res$datList
+            memList[[loop]]<-res$memList
+            noisyList[[loop]]<-res$noisyList
+          } else {
+            infoFrameTheory<-res$infoFrameTheory
+            if(outputEmpirical)
+            { infoFrameData<-res$infoFrameData }
+            else { infoFrameData<-NULL }
+           
+            datList<-list(res$datList)
+            memList<-list(res$memList)
+            noisyList<-list(res$noisyList)
+          } 
+ 
         }
       }
     }
@@ -304,9 +373,17 @@ simClustDesign<-function(numClust=c(3,6,9),
   infoFrameTheory<-data.frame(infoFrameTheory)
   nr<-nrow(infoFrameTheory)
   rownames(infoFrameTheory)<-1:nr
-  infoFrameData<-data.frame(infoFrameData)
-  nr<-nrow(infoFrameData)
-  rownames(infoFrameData)<-1:nr
+  
+  if(outputEmpirical)
+  { infoFrameData<-data.frame(infoFrameData) 
+    nr<-nrow(infoFrameData)
+    rownames(infoFrameData)<-1:nr
+  }
+  else { infoFrameData<-NULL }
+
+  names(datList)<-1:loop
+  names(memList)<-1:loop
+  names(noisyList)<-1:loop
 
   if(outputInfo)
   { fileNameInfo<-paste(fileName, "_info.log", sep="")
@@ -320,19 +397,22 @@ simClustDesign<-function(numClust=c(3,6,9),
     write.table(tt, file=fileNameInfo, quote=FALSE, sep="\t",
                 row.names=FALSE, col.names=FALSE, append=TRUE)
 
-    msg<-"\nEmpirical separation information data frame>>>>>>>>>>>\n"
-    write.table(msg, append=TRUE, file=fileNameInfo, quote=FALSE,
-                row.names=FALSE, col.names=FALSE)
-    msg<-colnames(infoFrameData)
-    write(msg, append=TRUE, file=fileNameInfo, ncolumns=7, sep=" ")
-    tt<-infoFrameData
-    tt[,1:6]<-round(tt[,1:6], 3)
-    write.table(tt, file=fileNameInfo, quote=FALSE, sep="\t",
-                row.names=FALSE, col.names=FALSE, append=TRUE)
+    if(outputEmpirical)
+    { msg<-"\nEmpirical separation information data frame>>>>>>>>>>>\n"
+      write.table(msg, append=TRUE, file=fileNameInfo, quote=FALSE,
+                  row.names=FALSE, col.names=FALSE)
+      msg<-colnames(infoFrameData)
+      write(msg, append=TRUE, file=fileNameInfo, ncolumns=7, sep=" ")
+      tt<-infoFrameData
+      tt[,1:6]<-round(tt[,1:6], 3)
+      write.table(tt, file=fileNameInfo, quote=FALSE, sep="\t",
+                  row.names=FALSE, col.names=FALSE, append=TRUE)
+    }
   }
 
   cat("The process is completed successfully!\n")
-  return(list(infoFrameTheory=infoFrameTheory, 
-              infoFrameData=infoFrameData))
+  invisible(list(infoFrameTheory=infoFrameTheory, 
+              infoFrameData=infoFrameData, 
+              datList=datList, memList=memList, noisyList=noisyList))
 } 
 

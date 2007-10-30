@@ -11,16 +11,34 @@ and orientations.
 }
 \usage{
 simClustDesign(numClust=c(3,6,9), 
-  sepVal=c(0.01, 0.21, 0.342), 
-  sepLabels=c("L", "M", "H"), 
-  numNonNoisy=c(4,8,20), numNoisy=NULL, numOutlier=0, 
-  numReplicate=3, fileName="test", clustszind=2, 
-  clustSizeEq=50, rangeN=c(50,200), clustSizes=NULL,
-  covMethod=c("eigen", "unifcorrmat"), rangeVar=c(1, 10), 
-  lambdaLow=1, ratioLambda=10, rotateind=TRUE, 
-  iniProjDirMethod=c("SL", "naive"), 
-  projDirMethod=c("newton", "fixedpoint"), alpha=0.05, ITMAX=20, 
-  eps=1.0e-10, quiet=TRUE, outputEmpirical=TRUE, outputInfo=TRUE)
+               sepVal=c(0.01, 0.21, 0.342), 
+               sepLabels=c("L", "M", "H"), 
+               numNonNoisy=c(4,8,20), 
+               numNoisy=NULL, 
+               numOutlier=0, 
+               numReplicate=3, 
+               fileName="test", 
+               clustszind=2, 
+               clustSizeEq=50, 
+               rangeN=c(50,200), 
+               clustSizes=NULL,
+               covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
+               rangeVar=c(1, 10), 
+               lambdaLow=1, 
+               ratioLambda=10, 
+               alphad=1, 
+               eta=1, 
+               rotateind=TRUE, 
+               iniProjDirMethod=c("SL", "naive"), 
+               projDirMethod=c("newton", "fixedpoint"), 
+               alpha=0.05, 
+               ITMAX=20, 
+               eps=1.0e-10, 
+               quiet=TRUE, 
+               outputDatFlag=TRUE, 
+               outputLogFlag=TRUE, 
+               outputEmpirical=TRUE, 
+               outputInfo=TRUE)
 }
 \arguments{
   \item{numClust}{
@@ -142,6 +160,10 @@ In our experience, \code{lambdaLow}\eqn{=1} and \code{ratioLambda}\eqn{=10}
 can give reasonable variability of the diameters of clusters.
 \code{ratioLambda} should be larger than \eqn{1}.
   }
+\item{alphad}{parameter for unifcorrmat method to generate random correlation matrix
+ $alphad=1$ for uniform. \code{alphad} should be positive.}
+  \item{eta}{parameter for \dQuote{c-vine} and \dQuote{onion} methods to generate random correlation matrix
+ $eta=1$ for uniform. \code{eta} should be positive.}
   \item{rotateind}{
 Rotation indicator.
 \code{rotateind=TRUE} indicates randomly rotating data in non-noisy 
@@ -191,6 +213,12 @@ The default value is \eqn{1.0e-10}.
   }
   \item{quiet}{
 A flag to switch on/off the outputs of intermediate results and/or possible warning messages. The default value is \code{TRUE}.
+  }
+  \item{outputDatFlag}{
+Indicates if data set should be output to file.
+  }
+  \item{outputLogFlag}{
+Indicates if log info should be output to file.
   }
   \item{outputEmpirical}{
 Indicates if empirical separation indices and projection directions should be 
@@ -298,6 +326,20 @@ Median separation indices of the clusters to their neighbors.
 Data file names with format 
 \file{[fileName]J[j]G[g]v[p1]nv[p2]out[numOutlier]\_[numReplicate]} (see details).
   }
+
+  The function also returns three lists: \code{datList}, \code{memList}, and \code{noisyList}.
+
+  \item{datList:}{
+    a list of lists of data matrices for generated data sets.
+  }
+  \item{memList:}{
+    a list of lists of cluster memberships for data points for generated data sets.
+  }
+  \item{noisyList:}{
+    a list of lists of sets of noisy variables for generated data sets.
+  }
+
+
 }
 \references{
   Joe, H. (2006)
