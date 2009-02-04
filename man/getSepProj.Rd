@@ -23,7 +23,7 @@ Matrix of mean vectors. Rows correspond to mean vectors for clusters.
   }
   \item{SigmaArray}{
 Array of covariance matrices. \code{SigmaArray[,,i]} record the covariance 
-matrix of the $i$-th cluster.
+matrix of the \code{i}-th cluster.
   }
   \item{y}{
 Data matrix. Rows correspond to observations. Columns correspond to variables.
@@ -35,18 +35,18 @@ Cluster membership vector.
 Indicating the method to get initial projection direction when calculating
 the separation index between a pair of clusters (c.f. Qiu and Joe,
 2006a, 2006b). \cr
-     \code{iniProjDirMethod}$=$\dQuote{SL} indicates the initial projection 
+     \code{iniProjDirMethod}=\dQuote{SL} indicates the initial projection 
 direction is the sample version of the SL's projection direction 
 (Su and Liu, 1993)
 \eqn{\left(\boldsymbol{\Sigma}_1+\boldsymbol{\Sigma}_2\right)^{-1}\left(\boldsymbol{\mu}_2-\boldsymbol{\mu}_1\right)}\cr
-     \code{iniProjDirMethod}$=$\dQuote{naive} indicates the initial projection 
+     \code{iniProjDirMethod}=\dQuote{naive} indicates the initial projection 
 direction is \eqn{\boldsymbol{\mu}_2-\boldsymbol{\mu}_1}
   }
   \item{projDirMethod}{
 Indicating the method to get the optimal projection direction when calculating 
 the separation index between a pair of clusters (c.f. Qiu and Joe,
 2006a, 2006b). \cr
-     \code{projDirMethod}$=$\dQuote{newton} indicates we use the Newton-Raphson 
+     \code{projDirMethod}=\dQuote{newton} indicates we use the Newton-Raphson 
 method to search the optimal projection direction (c.f. Qiu and Joe, 2006a). 
 This requires the assumptions that both covariance matrices of the pair of 
 clusters are positive-definite. If this assumption is violated, the 
@@ -86,23 +86,23 @@ projection direction, even if the user specifies the value of the argument
 \code{projDirMethod} as \sQuote{newton}. Also, multiple initial projection 
 directions will be evaluated. 
 
-Specifically, $2+2p$ projection directions will be evaluated. The first 
+Specifically, \eqn{2+2p} projection directions will be evaluated. The first 
 projection direction is the \dQuote{naive} direction 
 \eqn{\boldsymbol{\mu}_2-\boldsymbol{\mu}_1}. 
 The second projection direction is the \dQuote{SL} projection direction  
 \eqn{\left(\boldsymbol{\Sigma}_1+\boldsymbol{\Sigma}_2\right)^{-1}
 \left(\boldsymbol{\mu}_2-\boldsymbol{\mu}_1\right)}.
-The next $p$ projection directions are the $p$ eigenvectors of the covariance 
-matrix of the first cluster. The remaining $p$ projection directions are 
-the $p$ eigenvectors of the covariance matrix of the second cluster. 
+The next \eqn{p} projection directions are the \eqn{p} eigenvectors of the covariance 
+matrix of the first cluster. The remaining \eqn{p} projection directions are 
+the \eqn{p} eigenvectors of the covariance matrix of the second cluster. 
 
-Each of these $2+2*p$ projection directions are in turn used as the initial 
+Each of these \eqn{2+2*p} projection directions are in turn used as the initial 
 projection direction for the \sQuote{fixedpoint} algorithm to obtain the 
 optimal projection direction and the corresponding optimal separation index. 
-We also obtain $2+2*p$ separation indices by projecting two clusters along each of these $2+2*p$ projection directions.
+We also obtain \eqn{2+2*p} separation indices by projecting two clusters along each of these \eqn{2+2*p} projection directions.
 
 Finally, the projection direction with the largest separation index among the 
-$2*(2+2*p)$ optimal separation indices is chosen as the optimal projection 
+\eqn{2*(2+2*p)} optimal separation indices is chosen as the optimal projection 
 direction. The corresponding separation index is chosen as the optimal 
 separation index.
 }

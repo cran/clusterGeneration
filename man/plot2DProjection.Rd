@@ -30,31 +30,31 @@ Data matrix of cluster 2. Rows correspond to observations. Columns correspond to
   \item{sepValMethod}{
 Method to calculate separation index for a pair of clusters projected onto a 
 1-D space. \code{sepValMethod="quantile"} indicates the quantile version of
-separation index will be used: $sepVal=(L_2-U_1)/(U_2-L_1)$ where $L_i$ and 
-$U_i$, $i=1, 2$, are the lower and upper \code{alpha/2} sample percentiles 
-of projected cluster $i$. \code{sepValMethod="normal"} indicates the 
+separation index will be used: \eqn{sepVal=(L_2-U_1)/(U_2-L_1)} where \eqn{L_i} and 
+\eqn{U_i}, \eqn{i=1, 2}, are the lower and upper \code{alpha/2} sample percentiles 
+of projected cluster \eqn{i}. \code{sepValMethod="normal"} indicates the 
 normal version of separation index will be used: 
-$sepVal=[(\bar{x}_2-\bar{x}_1)-z_{\alpha/2}(s_1+s_2)]/
-[(\bar{x}_2-\bar{x}_1)+z_{\alpha/2}(s_1+s_2)]$, 
-where $\bar{x}_i$ and $s_i$ are the sample mean and standard deviation 
-of projected cluster $i$.
+\eqn{sepVal=[(xbar_2-xbar_1)-z_{\alpha/2}(s_1+s_2)]/
+[(xbar_2-xbar_1)+z_{\alpha/2}(s_1+s_2)]}, 
+where \eqn{xbar_i} and \eqn{s_i} are the sample mean and standard deviation 
+of projected cluster \eqn{i}.
   }
   \item{iniProjDirMethod}{
 Indicating the method to get initial projection direction when calculating
 the separation index between a pair of clusters (c.f. Qiu and Joe,
 2006a, 2006b). \cr
-     \code{iniProjDirMethod}$=$\dQuote{SL} indicates the initial projection 
+     \code{iniProjDirMethod}=\dQuote{SL} indicates the initial projection 
 direction is the sample version of the SL's projection direction 
 (Su and Liu, 1993)
 \eqn{\left(\boldsymbol{\Sigma}_1+\boldsymbol{\Sigma}_2\right)^{-1}\left(\boldsymbol{\mu}_2-\boldsymbol{\mu}_1\right)}\cr
-     \code{iniProjDirMethod}$=$\dQuote{naive} indicates the initial projection 
+     \code{iniProjDirMethod}=\dQuote{naive} indicates the initial projection 
 direction is \eqn{\boldsymbol{\mu}_2-\boldsymbol{\mu}_1}
   }
   \item{projDirMethod}{
 Indicating the method to get the optimal projection direction when calculating 
 the separation index between a pair of clusters (c.f. Qiu and Joe,
 2006a, 2006b). \cr
-     \code{projDirMethod}$=$\dQuote{newton} indicates we use the Newton-Raphson 
+     \code{projDirMethod}=\dQuote{newton} indicates we use the Newton-Raphson 
 method to search the optimal projection direction (c.f. Qiu and Joe, 2006a). 
 This requires the assumptions that both covariance matrices of the pair of 
 clusters are positive-definite. If this assumption is violated, the 
@@ -133,7 +133,7 @@ A small positive number to check if a quantitiy \eqn{q} is equal to zero.
 If \eqn{|q|<}\code{eps}, then we regard \eqn{q} as equal to zero.  
 \code{eps} is used to check the denominator in the formula of the separation 
 index is equal to zero. Zero-value denominator indicates two clusters are 
-totally overlapped. Hence the separation index is set to be $-1$.
+totally overlapped. Hence the separation index is set to be \eqn{-1}.
 The default value of \code{eps} is \eqn{1.0e-10}.
   }
   \item{quiet}{
@@ -145,19 +145,19 @@ To get the second projection direction, we first construct an orthogonal
 matrix with first column \code{projDir}. Then we rotate the data points 
 according to this orthogonal matrix. Next, we remove the first dimension 
 of the rotated data points, and obtain the optimal projection direction 
-$projDir2$ for the rotated data points in the remaining dimensions. 
+\code{projDir2} for the rotated data points in the remaining dimensions. 
 Finally, we rotate the vector
-$projDir3=(0, projDir2)$ back to the original space. 
-The vector $projDir3$ is the second projection direction.
+\code{projDir3=(0, projDir2)} back to the original space. 
+The vector \code{projDir3} is the second projection direction.
 
 The ticks along X axis indicates the positions of points of the projected 
-two clusters. The positions of $L_i$ and $U_i$, $i=1, 2$, are also indicated 
-on X axis, where $L_i$ and $U_i$ are the lower and upper $\alpha/2$ sample 
-percentiles of cluster $i$ if \code{sepValMethod="quantile"}. 
+two clusters. The positions of \eqn{L_i} and \eqn{U_i}, \eqn{i=1, 2}, are also indicated 
+on X axis, where \eqn{L_i} and \eqn{U_i} are the lower and upper \eqn{\alpha/2} sample 
+percentiles of cluster \eqn{i} if \code{sepValMethod="quantile"}. 
 If \code{sepValMethod="normal"},
-$L_i=\bar{x}_i-z_{\alpha/2}s_i$, where $\bar{x}_i$ and $s_i$ are the 
-sample mean and standard deviation of cluster $i$, and $z_{\alpha/2}$ 
-is the upper $\alpha/2$ percentile of standard normal distribution.
+\eqn{L_i=xbar_i-z_{\alpha/2}s_i}, where \eqn{xbar_i} and \eqn{s_i} are the 
+sample mean and standard deviation of cluster \eqn{i}, and \eqn{z_{\alpha/2}} 
+is the upper \eqn{\alpha/2} percentile of standard normal distribution.
 }
 \value{
   \item{sepValx}{

@@ -1,3 +1,6 @@
+# v1.2.5  
+#  (1) fixed a bug in function 'genMemSize'. The 'numClust' inside
+#     the function 'genMemSize' should be 'G' 
 #
 # Generating cluster data sets with specified degree of separation.
 # The separation between any cluster and its nearest neighboring cluster 
@@ -301,7 +304,7 @@ genRandomClust<-function(numClust,
     len<-length(clustSizes)
     if(len!=numClust || is.null(clustSizes)) 
     {
-      stop("The number of elements in 'clustSizes' should be equal to the number of elements in 'numClust' when the value of 'clustszind' is equal to 3!\n")
+      stop("The number of elements in 'clustSizes' should be equal to the number 'numClust' of clusters when the value of 'clustszind' is equal to 3!\n")
     }
     for(i in 1:len)
     { if(clustSizes[i]<1 || !is.integer(clustSizes[i]))
@@ -1406,9 +1409,9 @@ genMemSize<-function(clustszind, G, clustSizeEq, rangeN, clustSizes, p, quiet=TR
   if(clustszind==3)
   {
     len<-length(clustSizes)
-    if(len!=numClust || is.null(clustSizes)) 
+    if(len!=G || is.null(clustSizes)) 
     {
-      stop("The number of elements in 'clustSizes' should be equal the number of elements in 'numClust' when the value of 'clustszind' is equal to 3!\n")
+      stop("The number of elements in 'clustSizes' should be equal the number 'G' of clusters when the value of 'clustszind' is equal to 3!\n")
     }
     clustSizes<-as.integer(clustSizes)
     for(i in 1:len)

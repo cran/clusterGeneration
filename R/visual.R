@@ -1,4 +1,7 @@
-
+# v1.2.5
+#  (1) fixed a bug in the function 'plot2DProjection'. The 'lim' should be
+#    'ylim' 
+#
 # plot separation plane a'(y-eta)=0, i.e. a'y-b=0, where b=a'eta.
 # y1 -- cluster 1. Rows correspond to observations. 
 #                  Columns correspond to variables
@@ -370,7 +373,7 @@ plot2DProjection<-function(y1, y2, projDir,
   if(missing(xlim)) { xlim<-range(tmpx) } 
   else { xlim<-xlim }
   if(missing(ylim)) { ylim<-range(tmpy) } 
-  else { ylim<-lim }
+  else { ylim<-ylim }
 
   xlim[1]<-min(xlim[1], Lx1, Lx2)
   xlim[2]<-max(xlim[2], Ux1, Ux2)

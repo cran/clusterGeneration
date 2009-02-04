@@ -9,13 +9,14 @@ Separation information matrix containing the nearest neighbor and farthest neigh
 }
 \arguments{
   \item{sepValMat}{
-a $K\times K$ matrix, where $K$ is the number of clusters. 
-\code{sepValMat[i,j]} is the separation index between cluster $i$ and $j$.
+a \code{K} by \code{K} matrix, where \code{K} is the number of clusters. 
+\code{sepValMat[i,j]} is the separation index between cluster \code{i} and 
+\code{j}.
   }
 }
 \value{
-This function returns a separation information matrix containing $K$ rows and 
-the following six columns, where $K$ is the number of clusters.
+This function returns a separation information matrix containing \code{K} rows and 
+the following six columns, where \code{K} is the number of clusters.
 
   \item{Column 1:}{
 Labels of clusters (\eqn{1, 2, \ldots, numClust}), where \eqn{numClust} is 

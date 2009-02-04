@@ -161,9 +161,9 @@ can give reasonable variability of the diameters of clusters.
 \code{ratioLambda} should be larger than \eqn{1}.
   }
 \item{alphad}{parameter for unifcorrmat method to generate random correlation matrix
- $alphad=1$ for uniform. \code{alphad} should be positive.}
+ \code{alphad=1} for uniform. \code{alphad} should be positive.}
   \item{eta}{parameter for \dQuote{c-vine} and \dQuote{onion} methods to generate random correlation matrix
- $eta=1$ for uniform. \code{eta} should be positive.}
+ \code{eta=1} for uniform. \code{eta} should be positive.}
   \item{rotateind}{
 Rotation indicator.
 \code{rotateind=TRUE} indicates randomly rotating data in non-noisy 
@@ -174,18 +174,18 @@ pair-wise scatter plots of the variables.
 Indicating the method to get initial projection direction when calculating
 the separation index between a pair of clusters (c.f. Qiu and Joe,
 2006a, 2006b). \cr
-\code{iniProjDirMethod}$=$\dQuote{SL}, the default, indicates the initial 
+\code{iniProjDirMethod}=\dQuote{SL}, the default, indicates the initial 
 projection direction is the sample version of the SL's projection direction 
 (Su and Liu, 1993, JASA)
 \eqn{\left(\boldsymbol{\Sigma}_1+\boldsymbol{\Sigma}_2\right)^{-1}\left(\boldsymbol{\mu}_2-\boldsymbol{\mu}_1\right)}\cr
-\code{iniProjDirMethod}$=$\dQuote{naive} indicates the initial projection 
+\code{iniProjDirMethod}=\dQuote{naive} indicates the initial projection 
 direction is \eqn{\boldsymbol{\mu}_2-\boldsymbol{\mu}_1}
   }
   \item{projDirMethod}{
 Indicating the method to get the optimal projection direction when calculating 
 the separation index between a pair of clusters (c.f. Qiu and Joe,
 2006a, 2006b). \cr
-\code{projDirMethod}$=$\dQuote{newton} indicates we use the modified
+\code{projDirMethod}=\dQuote{newton} indicates we use the modified
 Newton-Raphson method to search the optimal projection direction 
 (c.f. Qiu and Joe, 2006a). This requires the assumptions that both covariance 
 matrices of the pair of clusters are positive-definite. If this assumption 

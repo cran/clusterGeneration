@@ -17,9 +17,9 @@ Method to generate positive definite matrices/covariance matrices.
 Choices are \dQuote{eigen}, \dQuote{onion}, \dQuote{c-vine}, or \dQuote{unifcorrmat}; see details below. 
   }
   \item{alphad}{parameter for unifcorrmat method to generate random correlation matrix
- $alphad=1$ for uniform. \code{alphad} should be positive.}
+ \code{alphad=1} for uniform. \code{alphad} should be positive.}
   \item{eta}{parameter for \dQuote{c-vine} and \dQuote{onion} methods to generate random correlation matrix
- $eta=1$ for uniform. \code{eta} should be positive.}
+ \code{eta=1} for uniform. \code{eta} should be positive.}
   \item{rangeVar}{
 Range for variances of a covariance matrix (see details).
 The default range is \eqn{[1, 10]} which can generate reasonable
