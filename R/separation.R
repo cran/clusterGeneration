@@ -80,7 +80,7 @@ getProjDirIter<-function(projDir, mu1, Sigma1, mu2, Sigma2,
       cat("Warning: Both covariance matrices have rank zero!\n")
     }
     tt<-abs(diff)
-    pos<-which(tt==max(tt))
+    pos<-which(tt==max(tt, na.rm=TRUE))
     pos<-pos[1]
     projDir2<-rep(0,length(mu1))
     if(abs(tt[pos])>eps) # two clusters are totally separated
@@ -139,7 +139,7 @@ optimProjDirIter<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
     stop<-tmp$stop
     if(stop==TRUE || sum(abs(projDir))<eps) { break }
     projDir<-as.vector(projDir/sqrt(sum(projDir^2)))
-    diff<-max(abs(projDir-projDirOld))
+    diff<-max(abs(projDir-projDirOld), na.rm=TRUE)
     loop<-loop+1
     if(diff<eps) { break }
     if(loop>ITMAX)
@@ -267,7 +267,7 @@ sepIndexData<-function(projDir, y1, y2, alpha=0.05, eps=1.0e-10, quiet=TRUE)
     Sigma1<-matrix(0, nrow=len, ncol=len)
   } 
   else 
-  { mu1<-apply(y1, 2, mean)
+  { mu1<-apply(y1, 2, mean, na.rm=TRUE)
     Sigma1<-cov(y1)
   }
   if(is.vector(y2))
@@ -276,7 +276,7 @@ sepIndexData<-function(projDir, y1, y2, alpha=0.05, eps=1.0e-10, quiet=TRUE)
     Sigma2<-matrix(0, nrow=len, ncol=len)
   } 
   else 
-  { mu2<-apply(y2, 2, mean)
+  { mu2<-apply(y2, 2, mean, na.rm=TRUE)
     Sigma2<-cov(y2)
   }
 
@@ -419,7 +419,7 @@ projDirData<-function(y1, y2,
     Sigma1<-matrix(0, nrow=len, ncol=len)
   } 
   else 
-  { mu1<-apply(y1, 2, mean)
+  { mu1<-apply(y1, 2, mean, na.rm=TRUE)
     Sigma1<-cov(y1)
   }
   if(is.vector(y2))
@@ -428,7 +428,7 @@ projDirData<-function(y1, y2,
     Sigma2<-matrix(0, nrow=len, ncol=len)
   } 
   else 
-  { mu2<-apply(y2, 2, mean)
+  { mu2<-apply(y2, 2, mean, na.rm=TRUE)
     Sigma2<-cov(y2)
   }
 
@@ -526,7 +526,7 @@ projDirTheory<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
   a<-as.vector(a)
 
   # normalized a
-  denom<-max(abs(a))
+  denom<-max(abs(a), na.rm=TRUE)
   if(abs(denom)<eps)
   { if(!quiet)
     {
@@ -535,7 +535,7 @@ projDirTheory<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
     anorm<-a
   } 
   else 
-  { #anorm<-a/max(abs(a))
+  { #anorm<-a/max(abs(a), na.rm=TRUE)
     anorm<-a/as.vector(sqrt(crossprod(a)))
   }
   sepVal<-sepIndexTheory(anorm, mu1, Sigma1, mu2, Sigma2, alpha, eps, quiet)
@@ -579,7 +579,7 @@ getIniProjDirData<-function(y1, y2,
     Sigma1<-matrix(0, nrow=len, ncol=len)
   } 
   else 
-  { mu1<-apply(y1, 2, mean)
+  { mu1<-apply(y1, 2, mean, na.rm=TRUE)
     Sigma1<-cov(y1)
   }
   if(is.vector(y2))
@@ -588,7 +588,7 @@ getIniProjDirData<-function(y1, y2,
     Sigma2<-matrix(0, nrow=len, ncol=len)
   } 
   else 
-  { mu2<-apply(y2, 2, mean)
+  { mu2<-apply(y2, 2, mean, na.rm=TRUE)
     Sigma2<-cov(y2)
   }
 
@@ -912,7 +912,7 @@ getSepProjTheory<-function(muMat, SigmaArray,
           }
         }  else { # some variables are non-noisy, some variable are noisy
           # we choose a dimension has the maximum separation
-          tmppos3<-which(diffmu2==max(diffmu2))[1]
+          tmppos3<-which(diffmu2==max(diffmu2, na.rm=TRUE))[1]
           mydim<-myset2[tmppos3]
           a<-rep(0, tmpn) 
           a[mydim]<-1
@@ -1011,7 +1011,7 @@ getSepProjData<-function(y, cl,
   dimnames(SigmaArray)<-list(NULL, NULL, paste("cluster", 1:G, sep=""))
   for(i in 1:G)
   { yi<-y[cl==u.cl[i],,drop=FALSE]
-    muMat[i,]<-apply(yi, 2, mean)
+    muMat[i,]<-apply(yi, 2, mean, na.rm=TRUE)
     if(nrow(yi)>1) { SigmaArray[,,i]<-cov(yi) } 
     else { SigmaArray[,,i]<-matrix(0, nrow=p, ncol=p) }
   }

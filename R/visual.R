@@ -38,8 +38,8 @@ plot1DProjection<-function(y1, y2, projDir,
   n2<-length(x2)
   n<-n1+n2
 
-  m1<-mean(x1)
-  m2<-mean(x2)
+  m1<-mean(x1, na.rm=TRUE)
+  m2<-mean(x2, na.rm=TRUE)
   if(m1>m2)
   { 
     projDir<- -projDir
@@ -60,16 +60,16 @@ plot1DProjection<-function(y1, y2, projDir,
   
   if(sepValMethod=="quantile")
   { if(n1>1) 
-    { L1<-quantile(xx1, prob=alpha/2)
-      U1<-quantile(xx1, prob=1-alpha/2)
+    { L1<-quantile(xx1, prob=alpha/2, na.rm=TRUE)
+      U1<-quantile(xx1, prob=1-alpha/2, na.rm=TRUE)
     } 
     else 
     { L1<-xx1
       U1<-xx1
     }
     if(n2>1)
-    { L2<-quantile(xx2, prob=alpha/2)
-      U2<-quantile(xx2, prob=1-alpha/2)
+    { L2<-quantile(xx2, prob=alpha/2, na.rm=TRUE)
+      U2<-quantile(xx2, prob=1-alpha/2, na.rm=TRUE)
     } 
     else 
     { L2<-xx2
@@ -79,16 +79,16 @@ plot1DProjection<-function(y1, y2, projDir,
   else 
   { za<-qnorm(1-alpha/2)
     if(n1>1)
-    { m1<-mean(xx1)
-      sd1<-sd(xx1)
+    { m1<-mean(xx1, na.rm=TRUE)
+      sd1<-sd(c(xx1), na.rm=TRUE)
     } 
     else 
     { m1<-xx1
       sd1<-0
     }
     if(n2>1)
-    { m2<-mean(xx2)
-      sd2<-sd(xx2)
+    { m2<-mean(xx2, na.rm=TRUE)
+      sd2<-sd(c(xx2), na.rm=TRUE)
     } 
     else 
     { m2<-xx2
@@ -257,8 +257,8 @@ plot2DProjection<-function(y1, y2, projDir,
   tmpy1<-x[cl==1,2]
   tmpy2<-x[cl==2,2]
 
-  mx1<-mean(x1)
-  mx2<-mean(x2)
+  mx1<-mean(x1, na.rm=TRUE)
+  mx2<-mean(x2, na.rm=TRUE)
   if(mx1>mx2)
   { 
     x1<- -x1
@@ -271,8 +271,8 @@ plot2DProjection<-function(y1, y2, projDir,
   } 
   tmpx<-c(x1, x2)
 
-  my1<-mean(tmpy1)
-  my2<-mean(tmpy2)
+  my1<-mean(tmpy1, na.rm=TRUE)
+  my2<-mean(tmpy2, na.rm=TRUE)
   if(my1>my2)
   { 
     tmpy1<- -tmpy1
@@ -294,10 +294,10 @@ plot2DProjection<-function(y1, y2, projDir,
 
   if(sepValMethod=="quantile")
   { if(n1>1) 
-    { Lx1<-quantile(xx1, prob=alpha/2)
-      Ux1<-quantile(xx1, prob=1-alpha/2)
-      Ly1<-quantile(yy1, prob=alpha/2)
-      Uy1<-quantile(yy1, prob=1-alpha/2)
+    { Lx1<-quantile(xx1, prob=alpha/2, na.rm=TRUE)
+      Ux1<-quantile(xx1, prob=1-alpha/2, na.rm=TRUE)
+      Ly1<-quantile(yy1, prob=alpha/2, na.rm=TRUE)
+      Uy1<-quantile(yy1, prob=1-alpha/2, na.rm=TRUE)
     } 
     else 
     { Lx1<-xx1
@@ -306,10 +306,10 @@ plot2DProjection<-function(y1, y2, projDir,
       Uy1<-yy1
     }
     if(n2>1)
-    { Lx2<-quantile(xx2, prob=alpha/2)
-      Ux2<-quantile(xx2, prob=1-alpha/2)
-      Ly2<-quantile(yy2, prob=alpha/2)
-      Uy2<-quantile(yy2, prob=1-alpha/2)
+    { Lx2<-quantile(xx2, prob=alpha/2, na.rm=TRUE)
+      Ux2<-quantile(xx2, prob=1-alpha/2, na.rm=TRUE)
+      Ly2<-quantile(yy2, prob=alpha/2, na.rm=TRUE)
+      Uy2<-quantile(yy2, prob=1-alpha/2, na.rm=TRUE)
     } 
     else 
     { Lx2<-xx2
@@ -321,10 +321,10 @@ plot2DProjection<-function(y1, y2, projDir,
   else 
   { za<-qnorm(1-alpha/2)
     if(n1>1)
-    { mx1<-mean(xx1)
-      sdx1<-sd(xx1)
-      my1<-mean(yy1)
-      sdy1<-sd(yy1)
+    { mx1<-mean(xx1, na.rm=TRUE)
+      sdx1<-sd(c(xx1), na.rm=TRUE)
+      my1<-mean(yy1, na.rm=TRUE)
+      sdy1<-sd(c(yy1), na.rm=TRUE)
     } 
     else 
     { mx1<-xx1
@@ -333,10 +333,10 @@ plot2DProjection<-function(y1, y2, projDir,
       sdy1<-0
     }
     if(n2>1)
-    { mx2<-mean(xx2)
-      sdx2<-sd(xx2)
-      my2<-mean(yy2)
-      sdy2<-sd(yy2)
+    { mx2<-mean(xx2, na.rm=TRUE)
+      sdx2<-sd(c(xx2), na.rm=TRUE)
+      my2<-mean(yy2, na.rm=TRUE)
+      sdy2<-sd(c(yy2), na.rm=TRUE)
     } 
     else 
     { mx2<-xx2
@@ -415,11 +415,11 @@ getRotateData<-function(y1, y2, projDir,
     p<-length(y1) 
   } 
   else 
-  { mu1<-apply(y1, 2, mean) 
+  { mu1<-apply(y1, 2, mean, na.rm=TRUE) 
     p<-ncol(y1)
   }
   if(n2==1) { mu2<-as.vector(y2) } 
-  else { mu2<-apply(y2, 2, mean) }
+  else { mu2<-apply(y2, 2, mean, na.rm=TRUE) }
   if(n1==1 || n2==1)
   { cl<-rep(1:2, c(n1, n2))
     y1<-matrix(y1, nrow=n1, ncol=p)
@@ -562,7 +562,7 @@ eigenProj<-function(y,cl, outlierLabel=0)
   W<-matrix(0,nrow=p, ncol=p)
   for(i in 1:k0)
   { yi<-y2[cl==cl.set[i],]
-    mu.mat[i,]<-apply(yi, 2, mean)
+    mu.mat[i,]<-apply(yi, 2, mean, na.rm=TRUE)
     s[,,i]<-cov(yi)
     W<-W+s[,,i]
   }
@@ -614,14 +614,14 @@ DMSProj<-function(y, cl, outlierLabel=0)
   else { cl2<-cl; y2<-y; }
   cl.set<-sort(unique(cl2))
   k0<-length(cl.set)
-  n.set<-tapply(rep(1,length(cl2)), cl2, sum)
+  n.set<-tapply(rep(1,length(cl2)), cl2, sum, na.rm=TRUE)
 
   # obtain cluster centers and covariance matrices
   mu.mat<-matrix(0, nrow=k0, ncol=p)
   for(i in 1:k0)
   { yi<-y2[cl==cl.set[i],]
     if(n.set[i]>1)
-    { mu.mat[i,]<-apply(yi, 2, mean) }
+    { mu.mat[i,]<-apply(yi, 2, mean, na.rm=TRUE) }
     else { mu.mat[i,]<-yi }
   }
 

@@ -438,7 +438,7 @@ genRandomClust<-function(numClust,
     # rows are the eigenvalues of covariance matrices of the cluster
     egvaluesMat<-tmpms$egvaluesMat
     # cluster fractions
-    mypi<-size/sum(size)
+    mypi<-size/sum(size, na.rm=TRUE)
     # Obtain the mean vector and covariance matrix for noisy variables
     tmp<-genNoisyMeanCov(numNoisy, mypi, numClust, numNonNoisy, 
                          thetaMat, s, covMethod, alphad, eta, rangeVar, 
@@ -654,7 +654,7 @@ genVertexes<-function(numNonNoisy)
     # get centre of previous vertices, then add co-ordinate in pth dimension
     dd<-0.0
     for(j in 1:(p-2))
-    { s<-sum(vert[1:(p-1),j])
+    { s<-sum(vert[1:(p-1),j], na.rm=TRUE)
       tem<-s/(p-1.)
       vert[p,j]<-tem
       if(j==1) tem<-1. 
@@ -977,7 +977,7 @@ refineCov<-function(thetaMat, s, A, sepVal,
       iniProjDirMethod=iniProjDirMethod, projDirMethod=projDirMethod, 
       alpha=alpha, ITMAX=ITMAX, eps=eps, quiet=quiet)
     )
-    if(sum(class(newfit)=="try-error"))
+    if(sum(class(newfit)=="try-error", na.rm=TRUE))
     { warning("Could not find suitable upper bound of 'myc'!\n 'myc' is set to be 'myupper'!\n")
       myc <-myupper 
     } else {
@@ -1052,9 +1052,9 @@ neighborsMaxMin<-function(thetaMat, s, A,
   { pos<-k2[i]
     tmpJ<-sepValMat[pos,]
     tmpJ[pos]<-1
-    minJ[i]<-min(tmpJ)
+    minJ[i]<-min(tmpJ, na.rm=TRUE)
   }
-  maxminJ2<-max(minJ)
+  maxminJ2<-max(minJ, na.rm=TRUE)
   pos<-which(minJ==maxminJ2)
   pos<-k2[pos[1]]
   if(maxminJ<maxminJ2)
@@ -1109,7 +1109,7 @@ findUpperC<-function(thetaMat, s, sepVal,
     sepVal1<-sepValMat[1,]
     sepVal1[1]<-1
     # find the minimum separation index of the first cluster
-    minsepVal<-min(sepVal1)
+    minsepVal<-min(sepVal1, na.rm=TRUE)
     if(minsepVal<sepVal) { break }
     myc<-myc^2
   }
@@ -1163,7 +1163,7 @@ diffSepVal<-function(myc, thetaMat, s, sepVal,
   sepValMat<-tmp$sepValMat
   sepVal1<-sepValMat[1,]
   sepVal1[1]<-1
-  minsepVal<-min(sepVal1)
+  minsepVal<-min(sepVal1, na.rm=TRUE)
   res<-minsepVal-sepVal
   return(res)
 }
@@ -1244,13 +1244,13 @@ findNeighbors<-function(d, A, sepValMat)
   # the separation indices between 1st cluster and its neighboring clusters
   sepVal.neighbors<-list(sepValMat[1,neighbors[[1]]])
   tmpJ<-as.vector(sepVal.neighbors[[1]])
-  maxminJ<-min(tmpJ)
+  maxminJ<-min(tmpJ, na.rm=TRUE)
   k.maxmin<-1
   for(k in 2:numClust)
   { neighbors[[k]]<-myNeighbor(d, k, A) 
     sepVal.neighbors[[k]]<-sepValMat[k,neighbors[[k]]]
     tmpJ<-as.vector(sepVal.neighbors[[k]])
-    tmpminJ<-min(tmpJ)
+    tmpminJ<-min(tmpJ, na.rm=TRUE)
     if(tmpminJ>maxminJ) 
     { k.maxmin<-k 
       maxminJ<-tmpminJ
@@ -1309,11 +1309,11 @@ nearestNeighborSepVal<-function(sepValMat)
     neighbors.mat[i,4]<-pos.max
     neighbors.mat[i,5]<-Jvec[pos.max]
     Jvec2<-Jvec[-i]
-    minJ<-min(Jvec2)
+    minJ<-min(Jvec2, na.rm=TRUE)
     neighbors.mat[i,3]<-minJ
     pos.min<-which(Jvec==minJ)[1]
     neighbors.mat[i,2]<-pos.min
-    medianJ<-median(Jvec2)
+    medianJ<-median(Jvec2, na.rm=TRUE)
     neighbors.mat[i,6]<-medianJ
   }
   return(neighbors.mat)
@@ -1343,11 +1343,11 @@ nearestNeighbor<-function(d, A, sepValMat)
   for(k in 1:numClust)
   { neighbork<-myNeighbor(d, k, A)
     tmpJ<-as.vector(sepValMat[k,neighbork])
-    maxJ<-max(tmpJ)
+    maxJ<-max(tmpJ, na.rm=TRUE)
     pos.max<-neighbork[which(tmpJ==maxJ)]
-    minJ<-min(tmpJ)
+    minJ<-min(tmpJ, na.rm=TRUE)
     pos.min<-neighbork[which(tmpJ==minJ)]
-    medianJ<-median(tmpJ)
+    medianJ<-median(tmpJ, na.rm=TRUE)
     neighbors.mat[k,2]<-pos.min[1]
     neighbors.mat[k,3]<-minJ
     neighbors.mat[k,4]<-pos.max[1]
@@ -1444,23 +1444,23 @@ genMemSize<-function(clustszind, G, clustSizeEq, rangeN, clustSizes, p, quiet=TR
     n.upp<-rangeN[2]  
     ratio<-n.upp/n.low
     if(n.low<p)
-    { n.low<-max(2*p, 50)
+    { n.low<-max(2*p, 50, na.rm=TRUE)
       n.upp<-ratio*n.low
     }
     n.vec<-sample(n.low:n.upp,G,replace=TRUE) #generate cluster sizes
-    N<-sum(n.vec)
+    N<-sum(n.vec, na.rm=TRUE)
     pihat<-n.vec/N
     mem<-sample(1:G, N, replace=TRUE, prob=pihat);
   } 
   else 
   { n.vec<-clustSizes # cluster sizes are specified by the user.
-    N<-sum(n.vec)
+    N<-sum(n.vec, na.rm=TRUE)
     pihat<-n.vec/N
     mem<-sample(1:G, N, replace=TRUE, prob=pihat)
   }
   size<-rep(0,G) # get final cluster sizes
   for(i in 1:G) 
-  { size[i]<-sum(mem==i) }
+  { size[i]<-sum(mem==i, na.rm=TRUE) }
   return(list(mem=mem, size=size, N=N))
 }
 
@@ -1502,7 +1502,7 @@ genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod
   {
     stop("The convergence threshold 'eps' should be in (0, 0.01]!\n")
   }
-  if(abs(sum(mypi)-1.0)>eps)
+  if(abs(sum(mypi, na.rm=TRUE)-1.0)>eps)
   {
     stop("summation of 'mypi' should be equal to 1!\n")
   } 
@@ -1535,12 +1535,12 @@ genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod
   mu.noisy<-tmp$mu.mixture
   Sigma.noisy<-tmp$Sigma.mixture
   # Obtain the range of mu.noisy
-  range.mu<-range(mu.noisy)
+  range.mu<-range(mu.noisy, na.rm=TRUE)
   # Generate the mean vector of noisy variables
   mu.noisy<-runif(n=p2, min=range.mu[1], max=range.mu[2])
   # Obtain the range of the eigen values of Sigma.noisy
-  egvalues<-eigen(Sigma.noisy, sym=TRUE)$values
-  range.eg<-range(egvalues)
+  egvalues<-eigen(Sigma.noisy, symmetric=TRUE)$values
+  range.eg<-range(egvalues, na.rm=TRUE)
   # Generate the covariance matrix of noisy variables
   low<-range.eg[1]; upp<-range.eg[2]; 
   # obtain covariance matrices
@@ -1751,8 +1751,8 @@ genOutliers<-function(numOutlier, y)
   nOut<-outlierSize(numOutlier, N)
   if(nOut>0)
   { # Find the cooridinate-wise mean and sd of the data matrix y
-    mu<-apply(y, 2, mean)
-    s<-apply(y, 2, sd)
+    mu<-apply(y, 2, mean, na.rm=TRUE)
+    s<-apply(y, 2, sd, na.rm=TRUE)
     # Calculate the range of the uniform distribution in each dimension.
     # [mu[j]-5*s[j], mu[j]+5*s[j]], j=1,...,p.
     y.out<-matrix(0,nrow=nOut, ncol=p)
@@ -2326,9 +2326,9 @@ getAInterval<-function(vertexi, vertexj, si, sj, A2, sepVal,
     stop("The value of the quiet indicator 'quiet' should be logical, i.e., either 'TRUE' or 'FALSE'!\n")
   }
 
-  tmpsi<-min(diag(si)) 
-  tmpsj<-min(diag(sj))
-  A1<-min(tmpsi, tmpsj)
+  tmpsi<-min(diag(si), na.rm=TRUE) 
+  tmpsj<-min(diag(sj), na.rm=TRUE)
+  A1<-min(tmpsi, tmpsj, na.rm=TRUE)
   # get A1 so that the separation index between cluster i and j <0.
   while(1)
   { tmp<-funSepVal(A1, vertexi, vertexj, si, sj, sepVal, 
@@ -2338,9 +2338,9 @@ getAInterval<-function(vertexi, vertexj, si, sj, A2, sepVal,
   }
 
   # get A2 so that the separation index between cluster i and j  >0. 
-  tmpsi<-max(diag(si))
-  tmpsj<-max(diag(sj))
-  mystep<-max(tmpsi, tmpsj)
+  tmpsi<-max(diag(si), na.rm=TRUE)
+  tmpsj<-max(diag(sj), na.rm=TRUE)
+  mystep<-max(tmpsi, tmpsj, na.rm=TRUE)
   while(1)
   { tmp2<-funSepVal(A2, vertexi, vertexj, si, sj, sepVal, 
                     iniProjDirMethod, projDirMethod, alpha, 
@@ -2404,7 +2404,7 @@ getA<-function(A1, A2, vertex1, vertex2, Sigma1, Sigma2,
                projDirMethod=projDirMethod, alpha=alpha, 
                ITMAX=ITMAX, eps=eps, quiet=quiet)
   )
-  if(sum(class(newfit)=="try-error"))
+  if(sum(class(newfit)=="try-error", na.rm=TRUE))
   { warning("Could not find suitable upper bound of 'myc'!\n 'myc' is set to be 'A2'!\n")
     A <-A2
   } else {

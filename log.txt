@@ -1,0 +1,32 @@
+v1.2.8 >>>> March 19, 2012
+  (1) fixed a few warning messages:
+#   (a)>>
+#* checking R code for possible problems ... NOTE
+#genNoisyMeanCov: warning in eigen(Sigma.noisy, sym = TRUE): partial
+# argument match of 'sym' to 'symmetric'
+#
+#    (b)>>>
+#** running examples for arch 'i386' ... WARNING
+#Found the following significant warnings:
+#
+# Warning: sd(<matrix>) is deprecated.
+# Warning: sd(<matrix>) is deprecated.
+# Warning: sd(<matrix>) is deprecated.
+# Warning: sd(<matrix>) is deprecated.
+#Deprecated functions may be defunct as soon as of the next release of
+#R.
+#See ?Deprecated.
+#** running examples for arch 'x64' ... WARNING
+#Found the following significant warnings:
+#
+# Warning: sd(<matrix>) is deprecated.
+# Warning: sd(<matrix>) is deprecated.
+# Warning: sd(<matrix>) is deprecated.
+# Warning: sd(<matrix>) is deprecated.
+#Deprecated functions may be defunct as soon as of the next release of
+#R.
+#See ?Deprecated.
+#
+
+  (2) add 'na.rm=TRUE' to functions 'min', 'max', 'sum', 'mean', 'median', etc.
+
