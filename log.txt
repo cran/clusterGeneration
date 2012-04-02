@@ -1,3 +1,30 @@
+v1.2.9 >>>> April 2, 2012
+#  (1) fixed a bug pointed by Dr. Anton Korobeynikov 
+# <anton@korobeynikov.info>
+# Dear Dr. Weiliang Qiu,
+# 
+# Recently we tried to used your package clusterGeneration but found
+# that the behavior of genRandomClust() with clustszind == 3 is
+# definitely wrong compared to the one documented.
+# After looking into the implementation it became obvious that
+# genMemSize() function does wrong things: it tries to sample from 1:G
+# using provided clusterSizes as weights. Surely the output clusters
+# have wrong sizes (not the ones specified).
+# 
+# The fix is pretty simple: change the code for clustszind == 3 to
+# something like this:
+# 
+# mem <- sample(unlist(lapply(1:G, function(x) rep.int(x, times =
+# clustSizes[x]))))
+# N <- sum(clustSizes)
+# 
+# Or, maybe if you want to keep the current behavior it'd be better to
+# introduce new clustszind variant.
+# #
+#
+#  (2) add 'clustSizes<-as.integer(clustSizes)' before checking
+#      '!is.integer(clustSizes[i])'
+#
 v1.2.8 >>>> March 19, 2012
   (1) fixed a few warning messages:
 #   (a)>>

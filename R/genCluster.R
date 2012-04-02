@@ -306,6 +306,7 @@ genRandomClust<-function(numClust,
     {
       stop("The number of elements in 'clustSizes' should be equal to the number 'numClust' of clusters when the value of 'clustszind' is equal to 3!\n")
     }
+    clustSizes<-as.integer(clustSizes)
     for(i in 1:len)
     { if(clustSizes[i]<1 || !is.integer(clustSizes[i]))
       { stop(paste("The cluster size for the ", i, "-th cluster should be an integer greater than 1!\n", sep=""))
@@ -1453,10 +1454,11 @@ genMemSize<-function(clustszind, G, clustSizeEq, rangeN, clustSizes, p, quiet=TR
     mem<-sample(1:G, N, replace=TRUE, prob=pihat);
   } 
   else 
-  { n.vec<-clustSizes # cluster sizes are specified by the user.
-    N<-sum(n.vec, na.rm=TRUE)
-    pihat<-n.vec/N
-    mem<-sample(1:G, N, replace=TRUE, prob=pihat)
+  { # cluster sizes are specified by the user.
+    mem <- sample(unlist(lapply(1:G, function(x) rep.int(x, times =
+        clustSizes[x]))))
+    N <- sum(clustSizes, na.rm=TRUE)
+    pihat<-clustSizes/N
   }
   size<-rep(0,G) # get final cluster sizes
   for(i in 1:G) 

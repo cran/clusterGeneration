@@ -246,6 +246,7 @@ simClustDesign<-function(numClust=c(3,6,9),
     {
       stop("The number of elements in 'clustSizes' should be equal the number of elements in 'numClust' when the value of 'clustszind' is equal to 3!\n")
     }
+    clustSizes<-as.integer(clustSizes)
     for(i in 1:len)
     { if(clustSizes[i]<1 || !is.integer(clustSizes[i]))
       { stop(paste("The cluster size for the ", i, "-th cluster should be an integer greater than 1!\n", sep=""))
