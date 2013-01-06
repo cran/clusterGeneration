@@ -1,3 +1,13 @@
+v1.3.1 >>>> Jan 7, 2013
+#  (1) added a space between 'Weiliang Qiu' and 
+#    '<stwxq@channing.harvard.edu>' in the 'Maintainer' slot
+#   in the DESCRIPTION file
+#   Thank Dr. Kurt Hornik for his kind help!
+#
+v1.3.0 >>>> Jan 6, 2013
+# (1) rename 'log.txt' file to 'NEWS'. 
+# Thanks for Mr. Suraj Gupta (<suraj@wingedfootcapital.com>) for this suggestion!
+#
 v1.2.9 >>>> April 2, 2012
 #  (1) fixed a bug pointed by Dr. Anton Korobeynikov 
 # <anton@korobeynikov.info>

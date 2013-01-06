@@ -1,6 +1,7 @@
-dc901fe7062dc2cacef6f6bc8039d415 *DESCRIPTION
+163fef1390c05c4983af0414d73759c7 *DESCRIPTION
 e68616c36fae901fbbf08bf61e39edfe *INDEX
 d22f0cf868305353c32c788bed2f9690 *NAMESPACE
+b3c2b76a140a0856d10d5a109a6171ec *NEWS
 2a3a63d1df2302bf4e45dd8b50dc92e8 *R/genCluster.R
 b62e0df5c5b0c10f01b99c4d5b41b5e1 *R/hjrancor.R
 124087eaa0f3a417b7fb5e533a5d54a8 *R/rcvine.R
@@ -8,7 +9,6 @@ bdd1569ce6f6b4a30892d55cd24c39c6 *R/ronion.R
 563dd4ec15a380bafb41c766513e23ec *R/separation.R
 019cca6ba356a16034cc99d657cee10a *R/simClustDesign.R
 d0c487193e72f91e833abc496c1bccfc *R/visual.R
-d9b61492eeb1c8b9bc451de9a96c1951 *log.txt
 681294ea01f64915bff7dcaa95bb96a5 *man/genPositiveDefMat.Rd
 09fba5eb49c111e46b0306453b02a8de *man/genRandomClust.Rd
 740741792a3283d9e7651446fb8da1b6 *man/getSepProj.Rd
