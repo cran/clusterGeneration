@@ -1001,7 +1001,7 @@ getSepProjData<-function(y, cl,
 
   if(!quiet)
   { cat(" *** Step 2.10.2:  Calculate the empirical separation index matrix and projection directions.***\n") }
-  u.cl<-unique(cl)
+  u.cl<-sort(unique(cl))
   G<-length(u.cl)
   if(G<2)
   { stop("Error! There is only one cluster in the data set!\n") }
@@ -1010,7 +1010,7 @@ getSepProjData<-function(y, cl,
   SigmaArray<-array(0, c(p,p,G)) 
   dimnames(SigmaArray)<-list(NULL, NULL, paste("cluster", 1:G, sep=""))
   for(i in 1:G)
-  { yi<-y[cl==u.cl[i],,drop=FALSE]
+  { yi<-y[which(cl==u.cl[i]),,drop=FALSE]
     muMat[i,]<-apply(yi, 2, mean, na.rm=TRUE)
     if(nrow(yi)>1) { SigmaArray[,,i]<-cov(yi) } 
     else { SigmaArray[,,i]<-matrix(0, nrow=p, ncol=p) }

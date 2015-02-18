@@ -1,3 +1,10 @@
+v1.3.2 >>>> Feb 14, 2015
+#  (1) fixed a few bugs in function 'getSepProjData':
+#    'u.cl <- unique(cl)' should be 
+#    'u.cl <- sort(unique(cl)'
+#    'yi <- y[cl == u.cl[i], , drop = FALSE]'
+#    should be
+#    'yi <- y[which(cl == u.cl[i]), , drop = FALSE]'
 v1.3.1 >>>> Jan 7, 2013
 #  (1) added a space between 'Weiliang Qiu' and 
 #    '<stwxq@channing.harvard.edu>' in the 'Maintainer' slot
