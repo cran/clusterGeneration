@@ -30,7 +30,7 @@ A correlation matrix.
   \emph{Journal of Multivariate Analysis}, \bold{97}, 2177--2189.
 }
 \author{
-Weiliang Qiu \email{stwxq@channing.harvard.edu}\cr
+Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{

@@ -364,7 +364,7 @@ Data file names with format
 }
 \note{The speed of this function might be slow.}
 \author{
-Weiliang Qiu \email{stwxq@channing.harvard.edu}\cr
+Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{

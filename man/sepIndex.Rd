@@ -62,7 +62,7 @@ The value of the separation index defined in Qiu and Joe (2006).
   \emph{Computational Statistics and Data Analysis}, \bold{50}, 585--603.
 }
 \author{
-Weiliang Qiu \email{stwxq@channing.harvard.edu}\cr
+Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{

@@ -370,7 +370,7 @@ the replicate number.
 }
 \note{This function might be take a while to complete.}
 \author{
-Weiliang Qiu \email{stwxq@channing.harvard.edu}\cr
+Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{

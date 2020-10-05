@@ -5,8 +5,15 @@
 Generate a positive definite matrix/covariance matrix.
 }
 \usage{
-genPositiveDefMat(dim, covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
-                  alphad=1, eta=1, rangeVar=c(1,10), lambdaLow=1, ratioLambda=10)
+genPositiveDefMat(
+  dim, 
+  covMethod = c("eigen", "onion", "c-vine", "unifcorrmat"), 
+  eigenvalue = NULL,
+  alphad = 1, 
+  eta = 1, 
+  rangeVar = c(1, 10), 
+  lambdaLow = 1, 
+  ratioLambda = 10)
 }
 \arguments{
   \item{dim}{
@@ -15,6 +22,9 @@ Dimension of the matrix to be generated.
   \item{covMethod}{
 Method to generate positive definite matrices/covariance matrices.
 Choices are \dQuote{eigen}, \dQuote{onion}, \dQuote{c-vine}, or \dQuote{unifcorrmat}; see details below. 
+  }
+  \item{eigenvalue}{
+numeric. user-specified eigenvalues when \code{covMethod = "eigen"}. If \code{eigenvalue = NULL} and \code{covMethod = "eigen"}, then eigenvalues will be automatically generated.  
   }
   \item{alphad}{parameter for unifcorrmat method to generate random correlation matrix
  \code{alphad=1} for uniform. \code{alphad} should be positive.}
@@ -84,12 +94,16 @@ positive definite matrix/covariance matrix
 
 }
 \author{
-Weiliang Qiu \email{stwxq@channing.harvard.edu}\cr
+Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{
-genPositiveDefMat("unifcorrmat",dim=4)
-genPositiveDefMat("eigen",dim=5)
+genPositiveDefMat("unifcorrmat",dim = 4)
+
+aa <- genPositiveDefMat("eigen", eigenvalue = c(3, 2, 1), dim=3)
+print(aa)
+print(eigen(aa$Sigma))
+
 }
 \keyword{cluster}
 

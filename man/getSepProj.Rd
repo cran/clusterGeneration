@@ -128,7 +128,7 @@ Array of projection directions for each pair of clusters
   \emph{Journal of the American Statistical Association}, \bold{88}, 1350--1355.
 }
 \author{
-Weiliang Qiu \email{stwxq@channing.harvard.edu}\cr
+Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{

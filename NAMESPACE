@@ -15,3 +15,8 @@ export(genRandomClust,
 
 import(MASS)
 
+    importFrom("graphics", "par", "points", "title")
+    importFrom("stats", "cov", "density", "dist", "median", "qbeta",
+               "qnorm", "quantile", "rbeta", "rnorm", "runif", "sd",
+               "uniroot")
+    importFrom("utils", "write.table")

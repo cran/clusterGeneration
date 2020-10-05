@@ -1282,7 +1282,7 @@ nearestNeighborSepVal<-function(sepValMat)
   { 
     stop("The separation index matrix 'sepValMat' should contains at least 1 element!\n")
   }
-  pos<-which(tmp< -1 || tmp>1)
+  pos<-which( (tmp < -1) | (tmp > 1))
   if(length(pos)>0)
   {
       stop("The element of the separation index matrix 'sepValMat' should be between [-1, 1]!\n")
@@ -2102,12 +2102,17 @@ outputData<-function(b, fileName, y, p, outputDatFlag=TRUE)
 #      In our experience, the range [lambdaLow=1, lambdaUpp=10]
 #      can give reasonable variability of the diameters of clusters.
 # dim -- the dimension of this positive definite matrix
-genPositiveDefMat<-function(dim, covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
-                            alphad=1, eta=1,
+genPositiveDefMat<-function(dim, 
+                            covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
+                            eigenvalue = NULL,
+                            alphad=1, 
+                            eta=1,
                             rangeVar=c(1,10), 
-                            lambdaLow=1, ratioLambda=10)
+                            lambdaLow=1, 
+                            ratioLambda=10)
 { 
   covMethod<-match.arg(arg=covMethod, choices=c("eigen", "onion", "c-vine", "unifcorrmat"))
+  
   if(rangeVar[1]>rangeVar[2]) 
   { 
     stop("First element of 'rangeVar' should be smaller than second!\n")
@@ -2133,12 +2138,18 @@ genPositiveDefMat<-function(dim, covMethod=c("eigen", "onion", "c-vine", "unifco
     upp<-lambdaLow*ratioLambda
   
     u<-matrix(0, dim,dim) # u is an diagonal matrix
-    egvalues<-runif(dim,min=low,max=upp)
+    if(is.null(eigenvalue))
+    {
+      egvalues<-runif(dim,min=low,max=upp)
+    } else {
+      egvalues <- eigenvalue
+    }
     diag(u)<-egvalues #the diagonal elements of u are positive
     Sigma<-u
     if(dim>1)
     { Q<-genOrthogonal(dim) # generate an orthogonal matrix 
-      Sigma<-Q%*%u%*%t(Q) # the final positive definite matrix
+      Sigma <- crossprod(Q * sqrt(egvalues)) # the final positive definite matrix
+      #Sigma<-Q%*%u%*%t(Q) # the final positive definite matrix
     }
   } 
   else if (covMethod=="onion") {

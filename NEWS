@@ -1,3 +1,11 @@
+v1.3.5 >>>> Oct. 3, 2020
+#  (1) add new argument "eigenvalue" so that user can supply own eigenvalues for algorithm covMethod=c("eigen")
+#  (2) in genPositiveDefMat, using crossprod(Q * sqrt(egvalues)) instead of Sigma <- Q %*% u %*% t(Q) leads to nice improvements (3-4 times faster) when simulating large matrices (dim>500). Reason is that the new code does not require to form the u matrix, and that crossprod() is quite faster when used with a single argument (exploiting that output will be symmetric)
+#  
+#  Thanks Dr. Matthieu Stigler (matthieu.stigler@gmail.com) for these 2 suggestions!
+#
+#  (3) change maintainer's email address to <weiliang.qiu@gmail.com>
+
 v1.3.2 >>>> Feb 14, 2015
 #  (1) fixed a few bugs in function 'getSepProjData':
 #    'u.cl <- unique(cl)' should be 
