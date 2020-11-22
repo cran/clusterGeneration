@@ -8,10 +8,23 @@ Measure the magnitude of the gap or sparse area between a pair of clusters
 (or cluster distributions) along the specified projection direction.
 }
 \usage{
-sepIndexTheory(projDir, mu1, Sigma1, mu2, Sigma2, 
-                         alpha=0.05, eps=1.0e-10, quiet=TRUE)
+sepIndexTheory(
+	       projDir, 
+	       mu1, 
+	       Sigma1, 
+	       mu2, 
+	       Sigma2, 
+               alpha = 0.05, 
+	       eps = 1.0e-10, 
+	       quiet = TRUE)
 
-sepIndexData(projDir, y1, y2, alpha=0.05, eps=1.0e-10, quiet=TRUE)
+sepIndexData(
+	     projDir, 
+	     y1, 
+	     y2, 
+	     alpha = 0.05, 
+	     eps = 1.0e-10, 
+	     quiet = TRUE)
 }
 \arguments{
   \item{projDir}{
@@ -76,9 +89,12 @@ projDir<-c(1, 0)
 sepIndexTheory(projDir, mu1, Sigma1, mu2, Sigma2)
 
 library(MASS)
-y1<-mvrnorm(n1, mu1, Sigma1)
-y2<-mvrnorm(n2, mu2, Sigma2)
-sepIndexData(projDir, y1, y2)
+y1 <- mvrnorm(n1, mu1, Sigma1)
+y2 <- mvrnorm(n2, mu2, Sigma2)
+sepIndexData(
+	     projDir = projDir, 
+	     y1 = y1, 
+	     y2 = y2)
 
 }
 \keyword{cluster}

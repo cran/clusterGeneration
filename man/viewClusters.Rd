@@ -5,12 +5,20 @@
 Plot all clusters in a 2-D projection space. 
 }
 \usage{
-viewClusters(y, cl, outlierLabel=0,
-  projMethod="Eigen", xlim=NULL, ylim=NULL,
-  xlab="1st projection direction", 
-  ylab="2nd projection direction", 
-  title="Scatter plot of 2-D Projected Clusters",
-  font=2, font.lab=2, cex=1.2, cex.lab=1.2) 
+viewClusters(
+	     y, 
+	     cl, 
+	     outlierLabel = 0,
+             projMethod = "Eigen", 
+	     xlim = NULL, 
+	     ylim = NULL,
+             xlab = "1st projection direction", 
+             ylab = "2nd projection direction", 
+             title = "Scatter plot of 2-D Projected Clusters",
+             font = 2, 
+	     font.lab = 2, 
+	     cex = 1.2, 
+	     cex.lab = 1.2) 
 }
 \arguments{
   \item{y}{
@@ -98,31 +106,31 @@ Harry Joe \email{harry@stat.ubc.ca}
   \code{\link{plot2DProjection}}
 }
 \examples{
-n1<-50
-mu1<-c(0,0)
-Sigma1<-matrix(c(2,1,1,5),2,2)
-n2<-100
-mu2<-c(10,0)
-Sigma2<-matrix(c(5,-1,-1,2),2,2)
-n3<-30
-mu3<-c(10,10)
-Sigma3<-matrix(c(3,1.5,1.5,1),2,2)
-n4<-10
-mu4<-c(0,0)
-Sigma4<-50*diag(2)
+n1 <- 50
+mu1 <- c(0, 0)
+Sigma1 <- matrix(c(2, 1, 1, 5), 2, 2)
+n2 <- 100
+mu2 <- c(10, 0)
+Sigma2 <- matrix(c(5, -1, -1, 2), 2, 2)
+n3 <- 30
+mu3 <- c(10, 10)
+Sigma3 <- matrix(c(3, 1.5, 1.5, 1), 2, 2)
+n4 <- 10
+mu4 <- c(0, 0)
+Sigma4 <- 50*diag(2)
 
 library(MASS)
 set.seed(1234)
-y1<-mvrnorm(n1, mu1, Sigma1)
-y2<-mvrnorm(n2, mu2, Sigma2)
-y3<-mvrnorm(n3, mu3, Sigma3)
-y4<-mvrnorm(n4, mu4, Sigma4)
-y<-rbind(y1, y2, y3, y4)
-cl<-rep(c(1:3, 0), c(n1, n2, n3, n4))
+y1 <- mvrnorm(n1, mu1, Sigma1)
+y2 <- mvrnorm(n2, mu2, Sigma2)
+y3 <- mvrnorm(n3, mu3, Sigma3)
+y4 <- mvrnorm(n4, mu4, Sigma4)
+y <- rbind(y1, y2, y3, y4)
+cl <- rep(c(1:3, 0), c(n1, n2, n3, n4))
 
 par(mfrow=c(2,1))
-viewClusters(y, cl)
-viewClusters(y, cl,projMethod="DMS")
+viewClusters(y = y, cl = cl)
+viewClusters(y = y, cl = cl, projMethod = "DMS")
 
 }
 \keyword{cluster}

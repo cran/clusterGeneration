@@ -5,14 +5,33 @@
 Plot a pair of clusters and their density estimates, which are projected along a specified 1-D projection direction. 
 }
 \usage{
-plot1DProjection(y1, y2, projDir, 
-  sepValMethod=c("normal", "quantile"), bw="nrd0", 
-  xlim=NULL, ylim=NULL, 
-  xlab="1-D projected clusters", ylab="density estimates", 
-  title="1-D Projected Clusters and their density estimates",
-  font=2, font.lab=2, cex=1.2, cex.lab=1.2, cex.main=1.5,
-  lwd=4, lty1=1, lty2=2, pch1=18, pch2=19, col1=2, col2=4, 
-  type="l", alpha=0.05, eps=1.0e-10, quiet=TRUE)
+plot1DProjection(
+		 y1, 
+		 y2, 
+		 projDir, 
+                 sepValMethod = c("normal", "quantile"), 
+		 bw = "nrd0", 
+                 xlim = NULL, 
+		 ylim = NULL, 
+                 xlab = "1-D projected clusters", 
+		 ylab = "density estimates", 
+                 title = "1-D Projected Clusters and their density estimates",
+                 font = 2, 
+		 font.lab = 2, 
+		 cex = 1.2, 
+		 cex.lab = 1.2, 
+		 cex.main = 1.5,
+                 lwd = 4, 
+		 lty1 = 1, 
+		 lty2 = 2, 
+		 pch1 = 18, 
+		 pch2 = 19, 
+		 col1 = 2, 
+		 col2 = 4, 
+                 type = "l", 
+		 alpha = 0.05, 
+		 eps = 1.0e-10, 
+		 quiet = TRUE)
 }
 \arguments{
   \item{y1}{
@@ -149,26 +168,33 @@ Harry Joe \email{harry@stat.ubc.ca}
   \code{\link{viewClusters}}
 }
 \examples{
-n1<-50
-mu1<-c(0,0)
-Sigma1<-matrix(c(2,1,1,5),2,2)
-n2<-100
-mu2<-c(10,0)
-Sigma2<-matrix(c(5,-1,-1,2),2,2)
-projDir<-c(1, 0)
+n1 <- 50
+mu1 <- c(0,0)
+Sigma1 <- matrix(c(2, 1, 1, 5), 2, 2)
+n2 <- 100
+mu2 <- c(10, 0)
+Sigma2 <- matrix(c(5, -1, -1, 2), 2, 2)
+projDir <- c(1,  0)
 
 library(MASS)
 set.seed(1234)
-y1<-mvrnorm(n1, mu1, Sigma1)
-y2<-mvrnorm(n2, mu2, Sigma2)
-y<-rbind(y1, y2)
-cl<-rep(1:2, c(n1, n2))
+y1 <- mvrnorm(n1, mu1, Sigma1)
+y2 <- mvrnorm(n2, mu2, Sigma2)
+y <- rbind(y1, y2)
+cl <- rep(1:2, c(n1, n2))
 
-b<-getSepProjData(y, cl, iniProjDirMethod="SL", projDirMethod="newton")
+b <- getSepProjData(
+		    y = y, 
+		    cl = cl, 
+		    iniProjDirMethod = "SL", 
+		    projDirMethod = "newton")
 # projection direction for clusters 1 and 2
-projDir<-b$projDirArray[1,2,]
+projDir <- b$projDirArray[1, 2, ]
 
-plot1DProjection(y1, y2, projDir)
+plot1DProjection(
+		 y1 = y1, 
+		 y2 = y2, 
+		 projDir = projDir)
 
 }
 \keyword{cluster}

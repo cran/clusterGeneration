@@ -1,3 +1,9 @@
+v1.3.6 >>>> Nov. 21, 2020
+# (1) added "na.rm=TRUE" when calling 'sum', 'max'
+# (2) when call a function, explicitly call its input
+# (3) fixed a bub in function 'genMeanCov': when calling 'genPositiveDefMat', the input 'eigenvalue' was missing.
+# (4) added input argument 'eigenvalue' to function 'genMeanCov' and 'genRandomClust' and 'genNoisyMeanCov' and 'simClustDesign'
+
 v1.3.5 >>>> Oct. 3, 2020
 #  (1) add new argument "eigenvalue" so that user can supply own eigenvalues for algorithm covMethod=c("eigen")
 #  (2) in genPositiveDefMat, using crossprod(Q * sqrt(egvalues)) instead of Sigma <- Q %*% u %*% t(Q) leads to nice improvements (3-4 times faster) when simulating large matrices (dim>500). Reason is that the new code does not require to form the u matrix, and that crossprod() is quite faster when used with a single argument (exploiting that output will be symmetric)

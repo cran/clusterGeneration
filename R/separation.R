@@ -11,9 +11,14 @@
 #      projDirMethod="naive" => iniProjDir<-(mu2-mu1)
 # eps -- a small positive number used to check if a quantity is equal to zero.
 #      'eps' is mainly used to check if an iteration algorithm converges.
-getIniProjDirTheory<-function(mu1, Sigma1, mu2, Sigma2, 
-                       iniProjDirMethod=c("SL", "naive"), 
-                       eps=1.0e-10, quiet=TRUE)
+getIniProjDirTheory<-function(
+			      mu1, 
+			      Sigma1, 
+			      mu2, 
+			      Sigma2, 
+                              iniProjDirMethod = c("SL", "naive"), 
+                              eps = 1.0e-10, 
+			      quiet = TRUE)
 {
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   if(iniProjDirMethod=="SL")
@@ -22,8 +27,8 @@ getIniProjDirTheory<-function(mu1, Sigma1, mu2, Sigma2,
 
     if(abs(det(tmp))<eps)
     { 
-      t1<-sum(abs(as.vector(Sigma1)))
-      t2<-sum(abs(as.vector(Sigma2)))
+      t1<-sum(abs(as.vector(Sigma1)), na.rm=TRUE)
+      t2<-sum(abs(as.vector(Sigma2)), na.rm=TRUE)
       if(abs((t1+t2))<eps) # Sigma_1=Sigma_2=0
       { if(!quiet)         
         { cat("Warning: Both covariance matrices are zero matrix!\n Naive direction is used instead!\n")
@@ -66,8 +71,14 @@ getIniProjDirTheory<-function(mu1, Sigma1, mu2, Sigma2,
 # output projection direction at the (t+1)-th step
 # See documentation of getIniProjDirTheory for explanation of arguments:
 # mu1, Sigma1, mu2, Sigma2, eps
-getProjDirIter<-function(projDir, mu1, Sigma1, mu2, Sigma2, 
-                         eps=1.0e-10, quiet=TRUE)
+getProjDirIter<-function(
+			 projDir, 
+			 mu1, 
+			 Sigma1, 
+			 mu2, 
+			 Sigma2, 
+                         eps=1.0e-10, 
+			 quiet=TRUE)
 {
   tmp1<-as.numeric((abs(t(projDir)%*%Sigma1%*%projDir)))
   tmp2<-as.numeric((abs(t(projDir)%*%Sigma2%*%projDir)))
@@ -107,19 +118,26 @@ getProjDirIter<-function(projDir, mu1, Sigma1, mu2, Sigma2,
 #      The default value is 'TRUE'.
 # See documentation of getIniProjDirTheory for explanation of arguments:
 # mu1, Sigma1, mu2, Sigma2, eps
-optimProjDirIter<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2, 
-                           ITMAX=20, eps=1.0e-10, quiet=TRUE)
+optimProjDirIter<-function(
+			   iniProjDir, 
+			   mu1, 
+			   Sigma1, 
+			   mu2, 
+			   Sigma2, 
+                           ITMAX = 20, 
+			   eps = 1.0e-10, 
+			   quiet = TRUE)
 {
   diff<-1.0e+300
   loop<-0
-  denom<-sqrt(sum(iniProjDir^2))
+  denom<-sqrt(sum(iniProjDir^2, na.rm=TRUE))
   if(abs(denom)<eps)
   { if(!quiet) 
     { 
       cat("Warning: Initial projection direction 'iniProjDir'=0!\n")
     }
     projDir<-mu2-mu1
-    denom<-sqrt(sum(projDir^2))
+    denom<-sqrt(sum(projDir^2, na.rm=TRUE))
     if(abs(denom)<eps)
     { if(!quiet)
       { 
@@ -130,15 +148,22 @@ optimProjDirIter<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
     }
     return((mu2-mu1)/denom) 
   }
-  iniProjDir<-as.vector(iniProjDir/sqrt(sum(iniProjDir^2)))
+  iniProjDir<-as.vector(iniProjDir/sqrt(sum(iniProjDir^2, na.rm=TRUE)))
   projDirOld<-iniProjDir
   while(1)
   {
-    tmp<-getProjDirIter(projDirOld, mu1, Sigma1, mu2, Sigma2, eps, quiet) 
+    tmp<-getProjDirIter(
+			projDir = projDirOld, 
+			mu1 = mu1, 
+			Sigma1 = Sigma1, 
+			mu2 = mu2, 
+			Sigma2 = Sigma2, 
+			eps = eps, 
+			quiet = quiet) 
     projDir<-tmp$projDir
     stop<-tmp$stop
-    if(stop==TRUE || sum(abs(projDir))<eps) { break }
-    projDir<-as.vector(projDir/sqrt(sum(projDir^2)))
+    if(stop==TRUE || sum(abs(projDir), na.rm=TRUE)<eps) { break }
+    projDir<-as.vector(projDir/sqrt(sum(projDir^2, na.rm=TRUE)))
     diff<-max(abs(projDir-projDirOld), na.rm=TRUE)
     loop<-loop+1
     if(diff<eps) { break }
@@ -165,8 +190,15 @@ optimProjDirIter<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
 #      the significance level in hypothesis testing as 0.05.
 # See documentation of getIniProjDirTheory for explanation of arguments:
 # mu1, Sigma1, mu2, Sigma2, eps
-sepIndexTheory<-function(projDir, mu1, Sigma1, mu2, Sigma2, 
-                         alpha=0.05, eps=1.0e-10, quiet=TRUE)
+sepIndexTheory<-function(
+			 projDir, 
+			 mu1, 
+			 Sigma1, 
+			 mu2, 
+			 Sigma2, 
+                         alpha = 0.05, 
+			 eps = 1.0e-10, 
+			 quiet = TRUE)
 {
   if(as.vector(crossprod(projDir, mu2-mu1))<0)
   { if(!quiet) 
@@ -176,7 +208,7 @@ sepIndexTheory<-function(projDir, mu1, Sigma1, mu2, Sigma2,
     projDir<- - projDir
   }
   # standardize projDir
-  denom<-sqrt(sum(projDir^2))
+  denom<-sqrt(sum(projDir^2, na.rm=TRUE))
   if(abs(denom)<eps)
   { if(!quiet)
     {
@@ -195,7 +227,7 @@ sepIndexTheory<-function(projDir, mu1, Sigma1, mu2, Sigma2,
     { 
       cat("Warning: Both covariance matrices have rank zero!\n")
     }
-    tt<-sum(projDir*diff)
+    tt<-sum(projDir*diff, na.rm = TRUE)
     if(abs(tt)<eps)
     { if(!quiet)
       {
@@ -208,7 +240,7 @@ sepIndexTheory<-function(projDir, mu1, Sigma1, mu2, Sigma2,
     }
   }
   za<-qnorm(1-alpha/2)
-  part1<-sum(projDir*diff)
+  part1<-sum(projDir*diff, na.rm=TRUE)
   part2<-za*(b1ProjDir+b2ProjDir)
   d<-(part1-part2)/(part1+part2)
   return(d)
@@ -221,7 +253,13 @@ sepIndexTheory<-function(projDir, mu1, Sigma1, mu2, Sigma2,
 # mu1, tau1 -- mle of the mean and standard devitation of cluster 1
 # mu2, tau2 -- mle of mean and standard devitation of cluster 2
 # alpha -- tuning parameter
-sepIndex<-function(mu1, tau1, mu2, tau2, alpha=0.05, eps=1.0e-10)
+sepIndex<-function(
+		   mu1, 
+		   tau1, 
+		   mu2, 
+		   tau2, 
+		   alpha = 0.05, 
+		   eps = 1.0e-10)
 { Za<-qnorm(1-alpha/2) 
   L1<-mu1-Za*tau1; U1<-mu1+Za*tau1;
   L2<-mu2-Za*tau2; U2<-mu2+Za*tau2;
@@ -242,7 +280,13 @@ sepIndex<-function(mu1, tau1, mu2, tau2, alpha=0.05, eps=1.0e-10)
 # y2 -- data for cluster 2
 # See documentation of sepIndexTheory for explanation of arguments:
 # alpha, eps
-sepIndexData<-function(projDir, y1, y2, alpha=0.05, eps=1.0e-10, quiet=TRUE)
+sepIndexData<-function(
+		       projDir, 
+		       y1, 
+		       y2, 
+		       alpha = 0.05, 
+		       eps = 1.0e-10, 
+		       quiet = TRUE)
 {
   if(!(is.numeric(y1) || is.matrix(y1)))
   {
@@ -280,7 +324,15 @@ sepIndexData<-function(projDir, y1, y2, alpha=0.05, eps=1.0e-10, quiet=TRUE)
     Sigma2<-cov(y2)
   }
 
-  res<-sepIndexTheory(projDir, mu1, Sigma1, mu2, Sigma2, alpha, eps, quiet)
+  res<-sepIndexTheory(
+		      projDir = projDir, 
+		      mu1 = mu1, 
+		      Sigma1 = Sigma1, 
+		      mu2 = mu2, 
+		      Sigma2 = Sigma2, 
+		      alpha = alpha, 
+		      eps = eps, 
+		      quiet = quiet)
   return(res)
 }
 
@@ -304,19 +356,38 @@ sepIndexData<-function(projDir, y1, y2, alpha=0.05, eps=1.0e-10, quiet=TRUE)
 # See documentation of getIniProjDirTheory and sepIndexTheory for explanation 
 #   of arguments:
 # mu1, Sigma1, mu2, Sigma2, alpha, eps
-optimProjDirIterMulti<-function(mu1, Sigma1, mu2, Sigma2, alpha=0.05, 
-                         ITMAX=20, eps=1.0e-10, quiet=TRUE)
+optimProjDirIterMulti<-function(
+				mu1, 
+				Sigma1, 
+				mu2, 
+				Sigma2, 
+				alpha = 0.05, 
+                                ITMAX = 20, 
+				eps = 1.0e-10, 
+				quiet = TRUE)
 {
   p<-length(mu1)
   num<-2+2*p
   projDirMat<-matrix(0, nrow=num, ncol=p)
   # get initial projection directions
   # Su and Liu (1993)'s direction
-  projDirMat[1,]<-getIniProjDirTheory(mu1, Sigma1, mu2, Sigma2, "SL", 
-                                      eps, quiet)
+  projDirMat[1,]<-getIniProjDirTheory(
+				      mu1 = mu1, 
+				      Sigma1 = Sigma1, 
+				      mu2 = mu2, 
+				      Sigma2 = Sigma2, 
+				      iniProjDirMethod = "SL", 
+                                      eps = eps, 
+				      quiet = quiet)
   # naive direction
-  projDirMat[2,]<-getIniProjDirTheory(mu1, Sigma1, mu2, Sigma2, "naive", 
-                                      eps, quiet)
+  projDirMat[2,]<-getIniProjDirTheory(
+				      mu1 = mu1, 
+				      Sigma1 = Sigma1, 
+				      mu2 = mu2, 
+				      Sigma2 = Sigma2, 
+				      iniProjDirMethod = "naive", 
+                                      eps = eps, 
+				      quiet = quiet)
   start<-2+1
   end<-2+p
   # eigenvectors of Sigma1
@@ -332,14 +403,35 @@ optimProjDirIterMulti<-function(mu1, Sigma1, mu2, Sigma2, alpha=0.05,
   for(i in 1:num)
   { 
     tmpProjDir<-projDirMat[i,]
-    if(sum(tmpProjDir*(mu2-mu1))<0)
+    if(sum(tmpProjDir*(mu2-mu1), na.rm = TRUE)<0)
     { tmpProjDir<- -tmpProjDir }
-    sepVal1<-sepIndexTheory(tmpProjDir, mu1, Sigma1, mu2, Sigma2, 
-                            alpha, eps, quiet)
-    tmpProjDir2<-optimProjDirIter(tmpProjDir, mu1, Sigma1, mu2, 
-                            Sigma2, ITMAX, eps, quiet) 
-    sepVal2<-sepIndexTheory(tmpProjDir2, mu1, Sigma1, mu2, Sigma2, 
-                            alpha, eps, quiet)
+    sepVal1<-sepIndexTheory(
+			    projDir = tmpProjDir, 
+			    mu1 = mu1, 
+			    Sigma1 = Sigma1, 
+			    mu2 = mu2, 
+			    Sigma2 = Sigma2, 
+                            alpha = alpha, 
+			    eps = eps, 
+			    quiet = quiet)
+    tmpProjDir2<-optimProjDirIter(
+				  iniProjDir = tmpProjDir, 
+				  mu1 = mu1, 
+				  Sigma1 = Sigma1, 
+				  mu2 = mu2, 
+                                  Sigma2 = Sigma2, 
+				  ITMAX = ITMAX, 
+				  eps = eps, 
+				  quiet = quiet) 
+    sepVal2<-sepIndexTheory(
+			    projDir = tmpProjDir2, 
+			    mu1 = mu1, 
+			    Sigma1 = Sigma1, 
+			    mu2 = mu2, 
+			    Sigma2 = Sigma2, 
+                            alpha = alpha, 
+			    eps = eps, 
+			    quiet = quiet)
     
     if(sepVal1>maxSep)
     { maxSep<-sepVal1 # record maximum separation index
@@ -380,10 +472,15 @@ optimProjDirIterMulti<-function(mu1, Sigma1, mu2, Sigma2, alpha=0.05,
 #      of data points to downweight. We set 'alpha=0.05' like we set
 #      the significance level in hypothesis testing as 0.05.
 # quiet -- indicating if intermediate results should be output
-projDirData<-function(y1, y2, 
-                iniProjDirMethod=c("SL", "naive"), 
-                projDirMethod=c("newton", "fixedpoint"), 
-                alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+projDirData<-function(
+		      y1, 
+		      y2, 
+                      iniProjDirMethod = c("SL", "naive"), 
+                      projDirMethod = c("newton", "fixedpoint"), 
+                      alpha = 0.05, 
+		      ITMAX = 20, 
+		      eps = 1.0e-10, 
+		      quiet = TRUE)
 {
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -433,13 +530,26 @@ projDirData<-function(y1, y2,
   }
 
   # get initial projection direction 'a' so that 'a^T*a=1'
-  iniProjDir<-getIniProjDirTheory(mu1, Sigma1, mu2, Sigma2, 
-                                  iniProjDirMethod, eps, quiet)
+  iniProjDir<-getIniProjDirTheory(
+				  mu1 = mu1, 
+				  Sigma1 = Sigma1, 
+				  mu2 = mu2, 
+				  Sigma2 = Sigma2, 
+                                  iniProjDirMethod = iniProjDirMethod, 
+				  eps = eps, 
+				  quiet = quiet)
   # get optimal projection direction
-  res<-projDirTheory(iniProjDir=iniProjDir,  mu1=mu1, Sigma1=Sigma1, 
-                        mu2=mu2, Sigma2=Sigma2, 
-                        projDirMethod=projDirMethod, alpha=alpha, 
-                        ITMAX=ITMAX, eps=eps, quiet=quiet) 
+  res<-projDirTheory(
+		     iniProjDir = iniProjDir,  
+		     mu1 = mu1, 
+		     Sigma1 = Sigma1, 
+                     mu2 = mu2, 
+		     Sigma2 = Sigma2, 
+                     projDirMethod = projDirMethod, 
+		     alpha = alpha, 
+                     ITMAX = ITMAX, 
+		     eps = eps, 
+		     quiet = quiet) 
   return(res)
 }
 
@@ -464,9 +574,17 @@ projDirData<-function(y1, y2,
 #      of data points to downweight. We set 'alpha=0.05' like we set
 #      the significance level in hypothesis testing as 0.05.
 # quiet -- indicating if intermediate results should be output
-projDirTheory<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2, 
-                        projDirMethod=c("newton", "fixedpoint"), 
-                        alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+projDirTheory<-function(
+			iniProjDir, 
+			mu1, 
+			Sigma1, 
+			mu2, 
+			Sigma2, 
+                        projDirMethod = c("newton", "fixedpoint"), 
+                        alpha = 0.05, 
+			ITMAX = 20, 
+			eps = 1.0e-10, 
+			quiet = TRUE)
 {
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
   # get eigenvalues and eigenvectors of the matrix 'Sigma1'
@@ -491,23 +609,36 @@ projDirTheory<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
     }
     # search optimal projection direction using multiple starting projection
     # directions
-    res<-optimProjDirIterMulti(mu1, Sigma1, mu2, Sigma2, 
-                               alpha, ITMAX, eps, quiet) 
+    res<-optimProjDirIterMulti(
+			       mu1 = mu1, 
+			       Sigma1 = Sigma1, 
+			       mu2 = mu2, 
+			       Sigma2 = Sigma2, 
+                               alpha = alpha, 
+			       ITMAX = ITMAX, 
+			       eps = eps, 
+			       quiet = quiet) 
     return(res)
   }
 
   # normalize iniProjDir so that iniProjDir^T*(mu2-mu1)=1
   iniProjDir<-iniProjDir/tt
   # find matrix 'Q1' such that 't(Q1)*Sigma1*Q1=I_p'
-  Q1<-Q1Fun(Sigma1)
+  Q1<-Q1Fun(Sigma1 = Sigma1)
   # find matrix 'Q2' and the scalar 'c1' such that 
   # 't(Q2)*t(Q1)*(mu2-mu1)=c1*e1',
   # where 'e1=c(1,0,...,0)'.
-  tmp<-Q2c1Fun(Q1, mu1, mu2)
+  tmp<-Q2c1Fun(
+	       Q1 = Q1, 
+	       mu1 = mu1, 
+	       mu2 = mu2)
   Q2<-tmp$Q2
   c1<-tmp$c1
   # calculate the matrix 'V=t(Q2)*t(Q1)*Sigma2*Q1*Q2'
-  V<-VFun(Q1, Q2, Sigma2)
+  V<-VFun(
+	  Q1 = Q1, 
+	  Q2 = Q2, 
+	  Sigma2 = Sigma2)
 
   # inverse of 'Q1'
   iQ1<-solve(Q1)
@@ -518,7 +649,12 @@ projDirTheory<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
   bini<-as.vector(bini)
   yini<-bini[-1]
 
-  res<-newtonRaphson(yini, V, ITMAX, eps, quiet)
+  res<-newtonRaphson(
+		     yini = yini, 
+		     V = V, 
+		     ITMAX = ITMAX, 
+		     eps = eps, 
+		     quiet = quiet)
   y<-res$y
   code<-res$code
   b<-c(1, y)
@@ -538,7 +674,15 @@ projDirTheory<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
   { #anorm<-a/max(abs(a), na.rm=TRUE)
     anorm<-a/as.vector(sqrt(crossprod(a)))
   }
-  sepVal<-sepIndexTheory(anorm, mu1, Sigma1, mu2, Sigma2, alpha, eps, quiet)
+  sepVal<-sepIndexTheory(
+			 projDir = anorm, 
+			 mu1 = mu1, 
+			 Sigma1 = Sigma1, 
+			 mu2 = mu2, 
+			 Sigma2 = Sigma2, 
+			 alpha = alpha, 
+			 eps = eps, 
+			 quiet = quiet)
   if(!quiet)
   { cat("normalized projection direction>>\n"); print(anorm);
   }
@@ -555,9 +699,12 @@ projDirTheory<-function(iniProjDir, mu1, Sigma1, mu2, Sigma2,
 #           iniProjDirMethod="SL" => iniProjDir<-(Sigma1+Sigma2)^{-1}(mu2-mu1)
 #           iniProjDirMethod="naive" => iniProjDir<-(mu2-mu1)
 # eps -- threshold for convergence criterion. 
-getIniProjDirData<-function(y1, y2, 
-                            iniProjDirMethod=c("SL", "naive"), 
-                            eps=1.0e-10, quiet=TRUE)
+getIniProjDirData<-function(
+			    y1, 
+			    y2, 
+                            iniProjDirMethod = c("SL", "naive"), 
+                            eps = 1.0e-10, 
+			    quiet = TRUE)
 {
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   if(!(is.numeric(y1) || is.matrix(y1)))
@@ -592,8 +739,14 @@ getIniProjDirData<-function(y1, y2,
     Sigma2<-cov(y2)
   }
 
-  iniProjDir<-getIniProjDirTheory(mu1, Sigma1, mu2, Sigma2, 
-                                  iniProjDirMethod, eps, quiet)
+  iniProjDir<-getIniProjDirTheory(
+				  mu1 = mu1, 
+				  Sigma1 = Sigma1, 
+				  mu2 = mu2, 
+				  Sigma2 = Sigma2, 
+                                  iniProjDirMethod = iniProjDirMethod, 
+				  eps = eps, 
+				  quiet = quiet)
   return(iniProjDir) 
 }
 
@@ -628,13 +781,16 @@ Q1Fun<-function(Sigma1)
 #       where 'Sigma1' is the covariance matrix for group 1
 # mu1 -- mean vector for group 1
 # mu2 -- mean vector for group 2
-Q2c1Fun<-function(Q1, mu1, mu2)
+Q2c1Fun<-function(
+		  Q1, 
+		  mu1, 
+		  mu2)
 {
   theta<-as.vector(t(Q1)%*%(mu2-mu1))
   # Q2=(q_{21}, q_{22}, ..., q_{2p})
   # t(q_{21})*theta=c1
   # t(q_{2i})*theta=0, i=2,\ldots, p
-  Q2<-MOrthogonal(theta) # Q2 is an orthogonal matrix
+  Q2<-MOrthogonal(M = theta) # Q2 is an orthogonal matrix
   c1<-as.vector(Q2[,1]%*%theta)
   return(list(Q2=Q2, c1=c1))
 }
@@ -648,7 +804,9 @@ VFun<-function(Q1, Q2, Sigma2)
 
 
 # quadratic form 't(y)*A*y'
-quadraticFun<-function(y, A)
+quadraticFun<-function(
+		       y, 
+		       A)
 {
   y<-as.vector(y)
   A<-as.matrix(A)
@@ -669,14 +827,16 @@ g1Fun<-function(y)
 # where c2=v11-v21^T*V22^{-1}*v21.
 # By simplification, we can get
 # g2() = y^T*V22*y+2*y^T*v21+v11
-g2Fun<-function(y, V)
+g2Fun<-function(
+		y, 
+		V)
 {
-  tmp<-V2Fun(V)
+  tmp<-V2Fun(V = V)
   V22<-tmp$V22
   v21<-tmp$v21 
   v11<-V[1,1]
   # part1 = y^T*V22*y
-  part1<-quadraticFun(y, V22)
+  part1<-quadraticFun(y = y, A = V22)
   # part2 = 2*y^T*v21
   part2<-2*as.vector(crossprod(y, v21))
   res<-part1+part2+v11
@@ -684,20 +844,26 @@ g2Fun<-function(y, V)
 }
 
 # the function g() = sqrt(g1(y))+sqrt(g2(y))
-gFun<-function(y, V)
+gFun<-function(
+	       y, 
+	       V)
 {
-  g1<-g1Fun(y)
-  g2<-g2Fun(y, V)
+  g1<-g1Fun(y = y)
+  g2<-g2Fun(y = y, V = V)
   g<-sqrt(g1)+sqrt(g2)
   return(g)
 }
 
 # the 1st derivative of g() = y/sqrt(g1(y))+(V22*y+v21)/sqrt(g2(y))
-d1gFun<-function(y, V)
+d1gFun<-function(
+		 y, 
+		 V)
 {
-  g1<-g1Fun(y)
-  g2<-g2Fun(y, V)
-  tmp<-V2Fun(V)
+  g1<-g1Fun(y = y)
+  g2<-g2Fun(
+	    y = y, 
+	    V = V)
+  tmp<-V2Fun(V = V)
   V22<-tmp$V22
   v21<-tmp$v21
 
@@ -711,13 +877,15 @@ d1gFun<-function(y, V)
 
 # the 2nd derivative of g() = I/sqrt(g1(y))-y*y^T/[g1(y)*sqrt(g1(y))]
 # + V22/sqrt(g2(y))-(V22*y+v21)*(V22*y+v21)^T/[g2(y)*sqrt(g2(y))]
-d2gFun<-function(y, V)
+d2gFun<-function(
+		 y, 
+		 V)
 {
-  tmp<-V2Fun(V)
+  tmp<-V2Fun(V = V)
   V22<-tmp$V22
   v21<-tmp$v21
-  g1<-as.vector(g1Fun(y))
-  g2<-as.vector(g2Fun(y, V))
+  g1<-as.vector(g1Fun(y = y))
+  g2<-as.vector(g2Fun(y = y, V = V))
   p<-nrow(V)
   myI<-diag(p-1)
   part1<-(g1*myI-y%*%t(y))/as.vector(g1^(3/2))
@@ -746,7 +914,12 @@ V2Fun<-function(V)
 # ITMAX -- the maximum iteration allowed
 # eps -- convergence tolerance
 # quiet -- a flag to switch on/off the outputs of intermediate results
-newtonRaphson<-function(yini, V, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+newtonRaphson<-function(
+			yini, 
+			V, 
+			ITMAX = 20, 
+			eps = 1.0e-10, 
+			quiet = TRUE)
 {
   code<-0
   loop<-0
@@ -758,8 +931,8 @@ newtonRaphson<-function(yini, V, ITMAX=20, eps=1.0e-10, quiet=TRUE)
     { code<-1
       break
     }
-    d1g<-d1gFun(y, V)
-    d2g<-d2gFun(y, V)
+    d1g<-d1gFun(y = y, V = V)
+    d2g<-d2gFun(y = y, V = V)
     tem<-solve(d2g,d1g)
     tem<-as.vector(tem)
     ynew <- (y-tem)
@@ -815,12 +988,17 @@ newtonRaphson<-function(yini, V, ITMAX=20, eps=1.0e-10, quiet=TRUE)
 #      converges. The default value is \eqn{1.0e-10}.
 # quiet -- a flag to switch on/off the outputs of intermediate results.
 #      The default value is 'TRUE'.
-getSepProjTheory<-function(muMat, SigmaArray, 
-                           iniProjDirMethod=c("SL", "naive"), 
-                           projDirMethod=c("newton", "fixedpoint"), 
-                           alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+getSepProjTheory<-function(
+			   muMat, 
+			   SigmaArray, 
+                           iniProjDirMethod = c("SL", "naive"), 
+                           projDirMethod = c("newton", "fixedpoint"), 
+                           alpha = 0.05, 
+			   ITMAX = 20, 
+			   eps = 1.0e-10, 
+			   quiet = TRUE)
 { 
-  iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
+  iniProjDirMethod<-match.arg(arg = iniProjDirMethod, choices = c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
   if(alpha<=0 || alpha>0.5)
   {
@@ -899,11 +1077,25 @@ getSepProjTheory<-function(muMat, SigmaArray,
             tauj<-sj[myset3, myset3]
           
             # get the initial projection direction
-            iniProjDir<-getIniProjDirTheory(nui, taui, nuj, tauj, 
-                                            iniProjDirMethod, eps, quiet)
+            iniProjDir<-getIniProjDirTheory(
+					    mu1 = nui, 
+					    Sigma1 = taui, 
+					    mu2 = nuj, 
+					    Sigma2 = tauj, 
+                                            iniProjDirMethod = iniProjDirMethod, 
+					    eps = eps, 
+					    quiet = quiet)
             # get the projection direction
-            tmpa<-projDirTheory(iniProjDir,  nui, taui, nuj, tauj, 
-                                projDirMethod, alpha, ITMAX, eps, quiet)
+            tmpa<-projDirTheory(iniProjDir = iniProjDir,  
+				mu1 = nui, 
+				Sigma1 = taui, 
+				mu2 = nuj, 
+				Sigma2 = tauj, 
+                                projDirMethod = projDirMethod, 
+				alpha = alpha, 
+				ITMAX = ITMAX, 
+				eps = eps, 
+				quiet = quiet)
             a2<-tmpa$projDir
             tmpaSepVal<-tmpa$sepVal
           
@@ -921,11 +1113,25 @@ getSepProjTheory<-function(muMat, SigmaArray,
       } else { # In all variables, variance of two clusters are not all equal to zero
 
         # get the initial projection direction
-        iniProjDir<-getIniProjDirTheory(mui, si, muj, sj, 
-                                        iniProjDirMethod, eps, quiet)
+        iniProjDir<-getIniProjDirTheory(
+					mu1 = mui, 
+					Sigma1 = si, 
+					mu2 = muj, 
+					Sigma2 = sj, 
+                                        iniProjDirMethod = iniProjDirMethod, 
+					eps = eps, 
+					quiet = quiet)
         # get the projection direction
-        tmpa<-projDirTheory(iniProjDir,  mui, si, muj, sj, 
-                            projDirMethod, alpha, ITMAX, eps, quiet)
+        tmpa<-projDirTheory(iniProjDir = iniProjDir,  
+			    mu1 = mui, 
+			    Sigma1 = si, 
+			    mu2 = muj, 
+			    Sigma2 = sj, 
+                            projDirMethod = projDirMethod, 
+			    alpha = alpha, 
+			    ITMAX = ITMAX, 
+			    eps = eps, 
+			    quiet = quiet)
         a<-tmpa$projDir
         tmpaSepVal<-tmpa$sepVal
       }
@@ -967,10 +1173,15 @@ getSepProjTheory<-function(muMat, SigmaArray,
 # eps -- convergence tolerance
 # quiet -- a flag to switch on/off the outputs of intermediate results.
 #      The default value is 'TRUE'.
-getSepProjData<-function(y, cl, 
-                         iniProjDirMethod=c("SL", "naive"), 
-                         projDirMethod=c("newton", "fixedpoint"), 
-                         alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+getSepProjData<-function(
+			 y, 
+			 cl, 
+                         iniProjDirMethod = c("SL", "naive"), 
+                         projDirMethod = c("newton", "fixedpoint"), 
+                         alpha = 0.05, 
+			 ITMAX = 20, 
+			 eps = 1.0e-10, 
+			 quiet = TRUE)
 { 
   # QWL: should handle univariate case in the next version!
   if(!(is.matrix(y) || is.data.frame(y)))
@@ -1015,9 +1226,15 @@ getSepProjData<-function(y, cl,
     if(nrow(yi)>1) { SigmaArray[,,i]<-cov(yi) } 
     else { SigmaArray[,,i]<-matrix(0, nrow=p, ncol=p) }
   }
-  res<-getSepProjTheory(muMat, SigmaArray, 
-                        iniProjDirMethod, projDirMethod,
-                        alpha, ITMAX, eps, quiet)
+  res<-getSepProjTheory(
+			muMat = muMat, 
+			SigmaArray = SigmaArray, 
+                        iniProjDirMethod = iniProjDirMethod, 
+			projDirMethod = projDirMethod,
+                        alpha = alpha, 
+			ITMAX = ITMAX, 
+			eps = eps, 
+			quiet = quiet)
   return(res)
 }
 

@@ -147,35 +147,36 @@
 #      structures. Hence, by default, 'outputEmpirical=TRUE'.
 # outputInfo -- indicates if separation information dataframe should be output.
 #      The file name extension is .log
-simClustDesign<-function(numClust=c(3,6,9), 
-                         sepVal=c(0.01, 0.21, 0.342), 
-                         sepLabels=c("L", "M", "H"), 
-                         numNonNoisy=c(4,8,20), 
-                         numNoisy=NULL, 
-                         numOutlier=0, 
-                         numReplicate=3, 
-                         fileName="test", 
-                         clustszind=2, 
-                         clustSizeEq=50, 
-                         rangeN=c(50,200), 
-                         clustSizes=NULL,
-                         covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
-                         rangeVar=c(1, 10), 
-                         lambdaLow=1, 
-                         ratioLambda=10, 
-                         alphad=1, 
-                         eta=1, 
-                         rotateind=TRUE, 
-                         iniProjDirMethod=c("SL", "naive"), 
-                         projDirMethod=c("newton", "fixedpoint"), 
-                         alpha=0.05, 
-                         ITMAX=20, 
-                         eps=1.0e-10, 
-                         quiet=TRUE, 
-                         outputDatFlag=TRUE,
-                         outputLogFlag=TRUE,
-                         outputEmpirical=TRUE, 
-                         outputInfo=TRUE)
+simClustDesign<-function(numClust = c(3,6,9), 
+                         sepVal = c(0.01, 0.21, 0.342), 
+                         sepLabels = c("L", "M", "H"), 
+                         numNonNoisy = c(4,8,20), 
+                         numNoisy = NULL, 
+                         numOutlier = 0, 
+                         numReplicate = 3, 
+                         fileName = "test", 
+                         clustszind = 2, 
+                         clustSizeEq = 50, 
+                         rangeN = c(50,200), 
+                         clustSizes = NULL,
+                         covMethod = c("eigen", "onion", "c-vine", "unifcorrmat"), 
+			 eigenvalue = NULL,
+                         rangeVar = c(1, 10), 
+                         lambdaLow = 1, 
+                         ratioLambda = 10, 
+                         alphad = 1, 
+                         eta = 1, 
+                         rotateind = TRUE, 
+                         iniProjDirMethod = c("SL", "naive"), 
+                         projDirMethod = c("newton", "fixedpoint"), 
+                         alpha = 0.05, 
+                         ITMAX = 20, 
+                         eps = 1.0e-10, 
+                         quiet = TRUE, 
+                         outputDatFlag = TRUE,
+                         outputLogFlag = TRUE,
+                         outputEmpirical = TRUE, 
+                         outputInfo = TRUE)
 {
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -183,7 +184,7 @@ simClustDesign<-function(numClust=c(3,6,9),
   numClust<-as.integer(numClust)
 
   # checks for valid inputs
-  if(prod(numClust<1) || !is.integer(numClust)) 
+  if(prod(numClust<1, na.rm=TRUE) || !is.integer(numClust)) 
   { 
     stop("The number 'numClust' of clusters should be a positive integer!\n")
   }
@@ -192,7 +193,7 @@ simClustDesign<-function(numClust=c(3,6,9),
   { 
     stop("The number 'numNonNoisy' of non-noisy variables should be an integer greater than 1!\n") 
   }
-  if(prod(sepVal<= -0.999) || prod(sepVal >= 0.999)) 
+  if(prod(sepVal<= -0.999, na.rm=TRUE) || prod(sepVal >= 0.999, na.rm=TRUE)) 
   { 
     stop("The desired separation index 'sepVal' should be in the range (-0.999, 0.999)!\n")
   }
@@ -332,20 +333,34 @@ simClustDesign<-function(numClust=c(3,6,9),
           loop<-loop+1
           tmpfileName<-paste(fileName,"J", sepLabels[j],"G",g,
             "v", p1, "nv",p2, "out", numOutlier, sep="")
-          res<-genRandomClust(numClust=g, numNonNoisy=p1, sepVal=sepVal[j], 
-               numNoisy=p2, numReplicate=numReplicate, numOutlier=numOutlier, 
-               fileName=tmpfileName,  clustszind=clustszind, 
-               clustSizeEq=clustSizeEq, rangeN=rangeN, 
-               clustSizes=clustSizes, covMethod=covMethod, 
-               rangeVar=rangeVar, lambdaLow=lambdaLow, 
-               ratioLambda=ratioLambda,  rotateind=rotateind, 
-               iniProjDirMethod=iniProjDirMethod, 
-               projDirMethod=projDirMethod, alpha=alpha, 
-               ITMAX=ITMAX, eps=eps, quiet=quiet, 
-               outputDatFlag=outputDatFlag,
-               outputLogFlag=outputLogFlag,
-               outputEmpirical=outputEmpirical, 
-               outputInfo=FALSE)
+          res<-genRandomClust(
+			      numClust = g, 
+			      numNonNoisy = p1, 
+			      sepVal = sepVal[j], 
+                              numNoisy = p2, 
+			      numReplicate = numReplicate, 
+			      numOutlier = numOutlier, 
+                              fileName = tmpfileName,  
+			      clustszind = clustszind, 
+                              clustSizeEq = clustSizeEq, 
+			      rangeN = rangeN, 
+                              clustSizes = clustSizes, 
+			      covMethod = covMethod, 
+			      eigenvalue = eigenvalue,
+                              rangeVar = rangeVar, 
+			      lambdaLow = lambdaLow, 
+                              ratioLambda = ratioLambda,  
+			      rotateind = rotateind, 
+                              iniProjDirMethod = iniProjDirMethod, 
+                              projDirMethod = projDirMethod, 
+			      alpha = alpha, 
+                              ITMAX = ITMAX, 
+			      eps = eps, 
+			      quiet = quiet, 
+                              outputDatFlag = outputDatFlag,
+                              outputLogFlag = outputLogFlag,
+                              outputEmpirical = outputEmpirical, 
+                              outputInfo = FALSE)
 
           if(loop>1) 
           { infoFrameTheory<-rbind(infoFrameTheory, res$infoFrameTheory)

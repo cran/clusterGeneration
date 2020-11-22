@@ -9,33 +9,34 @@ arbitrary diameters, shapes and orientations.
 }
 \usage{
 genRandomClust(numClust, 
-               sepVal=0.01, 
-               numNonNoisy=2, 
-               numNoisy=0, 
-               numOutlier=0, 
-               numReplicate=3, 
-               fileName="test",  
-               clustszind=2, 
-               clustSizeEq=50, 
-               rangeN=c(50,200), 
-               clustSizes=NULL, 
-               covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
-               rangeVar=c(1, 10), 
-               lambdaLow=1, 
-               ratioLambda=10,  
-               alphad=1,
-               eta=1,
-               rotateind=TRUE, 
-               iniProjDirMethod=c("SL", "naive"), 
-               projDirMethod=c("newton", "fixedpoint"), 
-               alpha=0.05, 
-               ITMAX=20, 
-               eps=1.0e-10, 
-               quiet=TRUE, 
-               outputDatFlag=TRUE, 
-               outputLogFlag=TRUE, 
-               outputEmpirical=TRUE, 
-               outputInfo=TRUE)
+               sepVal = 0.01, 
+               numNonNoisy = 2, 
+               numNoisy = 0, 
+               numOutlier = 0, 
+               numReplicate = 3, 
+               fileName = "test",  
+               clustszind = 2, 
+               clustSizeEq = 50, 
+               rangeN = c(50,200), 
+               clustSizes = NULL, 
+               covMethod = c("eigen", "onion", "c-vine", "unifcorrmat"), 
+	       eigenvalue = NULL,
+               rangeVar = c(1, 10), 
+               lambdaLow = 1, 
+               ratioLambda = 10,  
+               alphad = 1,
+               eta = 1,
+               rotateind = TRUE, 
+               iniProjDirMethod = c("SL", "naive"), 
+               projDirMethod = c("newton", "fixedpoint"), 
+               alpha = 0.05, 
+               ITMAX = 20, 
+               eps = 1.0e-10, 
+               quiet = TRUE, 
+               outputDatFlag = TRUE, 
+               outputLogFlag = TRUE, 
+               outputEmpirical = TRUE, 
+               outputInfo = TRUE)
 }
 \arguments{
   \item{numClust}{
@@ -127,6 +128,9 @@ set the default value of \code{clustSizes} as \code{NULL}.
 Method to generate covariance matrices for clusters (see details).
 The default method is 'eigen' so that the user can directly 
 specify the range of the \dfn{diameters} of clusters.
+  }
+    \item{eigenvalue}{
+numeric. user-specified eigenvalues when \code{covMethod = "eigen"}. If \code{eigenvalue = NULL} and \code{covMethod = "eigen"}, then eigenvalues will be automatically generated.  
   }
   \item{rangeVar}{
 Range for variances of a covariance matrix (see details).
@@ -374,16 +378,43 @@ Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{
-\dontrun{tmp1 <- genRandomClust(numClust=7, sepVal=0.3, numNonNoisy=5,  
-                numNoisy=3, numOutlier=5, numReplicate=2, fileName="chk1")}
-\dontrun{tmp2 <- genRandomClust(numClust=7, sepVal=0.3, numNonNoisy=5,  
-                numNoisy=3, numOutlier=5, numReplicate=2, 
-                covMethod="unifcorrmat", fileName="chk2")}
-\dontrun{tmp3 <- genRandomClust(numClust=2, sepVal=-0.1, numNonNoisy=2,  
-                numNoisy=6, numOutlier=30, numReplicate=1, 
-                clustszind=1, clustSizeEq=80, rangeVar=c(10, 20),
-                covMethod="unifcorrmat", iniProjDirMethod="naive",
-                projDirMethod="fixedpoint", fileName="chk3")}
+\dontrun{
+tmp1 <- genRandomClust(
+		       numClust = 7, 
+		       sepVal = 0.3, 
+		       numNonNoisy = 5,  
+                       numNoisy = 3, 
+		       numOutlier = 5, 
+		       numReplicate = 2, 
+		       fileName = "chk1")
+}
+\dontrun{
+tmp2 <- genRandomClust(
+		       numClust = 7, 
+		       sepVal = 0.3, 
+		       numNonNoisy = 5,  
+                       numNoisy = 3, 
+		       numOutlier = 5, 
+		       numReplicate = 2, 
+                       covMethod = "unifcorrmat", 
+		       fileName = "chk2")
+}
+\dontrun{
+tmp3 <- genRandomClust(
+		       numClust = 2, 
+		       sepVal = -0.1, 
+		       numNonNoisy = 2,  
+                       numNoisy = 6, 
+		       numOutlier = 30, 
+		       numReplicate = 1, 
+                       clustszind = 1, 
+		       clustSizeEq = 80, 
+		       rangeVar = c(10, 20),
+                       covMethod = "unifcorrmat", 
+		       iniProjDirMethod = "naive",
+                       projDirMethod = "fixedpoint", 
+		       fileName = "chk3")
+}
 
 }
 \keyword{cluster}

@@ -12,14 +12,33 @@
 # alpha -- tuning parameter
 # xlab, ylab -- labels of x and y coordinates
 # title -- title of the plot
-plot1DProjection<-function(y1, y2, projDir, 
-  sepValMethod=c("normal", "quantile"), bw="nrd0", 
-  xlim=NULL, ylim=NULL, 
-  xlab="1-D projected clusters", ylab="density estimates", 
-  title="1-D Projected Clusters and their density estimates",
-  font=2, font.lab=2, cex=1.2, cex.lab=1.2, cex.main=1.5,
-  lwd=4, lty1=1, lty2=2, pch1=18, pch2=19, col1=2, col2=4, type="l",
-  alpha=0.05, eps=1.0e-10, quiet=TRUE)
+plot1DProjection<-function(
+			   y1, 
+			   y2, 
+			   projDir, 
+                           sepValMethod = c("normal", "quantile"), 
+			   bw = "nrd0", 
+                           xlim = NULL, 
+			   ylim = NULL, 
+                           xlab = "1-D projected clusters", 
+			   ylab = "density estimates", 
+                           title = "1-D Projected Clusters and their density estimates",
+                           font = 2, 
+			   font.lab = 2, 
+			   cex = 1.2, 
+			   cex.lab = 1.2, 
+			   cex.main = 1.5,
+                           lwd = 4, 
+			   lty1 = 1, 
+			   lty2 = 2, 
+			   pch1 = 18, 
+			   pch2 = 19, 
+			   col1 = 2, 
+			   col2 = 4, 
+			   type = "l",
+                           alpha = 0.05, 
+			   eps = 1.0e-10, 
+			   quiet = TRUE)
 { 
   sepValMethod<-match.arg(sepValMethod, choices=c("normal", "quantile"))
   if(alpha<=0 || alpha>0.5)
@@ -128,26 +147,80 @@ plot1DProjection<-function(y1, y2, projDir,
   nn2<-length(tmpx2)
 
   if(is.null(xlim))
-  { xlim<-range(c(xx1, xx2, tmpx1, tmpx2)) }
+  { xlim<-range(c(xx1, xx2, tmpx1, tmpx2), na.rm=TRUE) }
   if(is.null(ylim))
-  { ylim<-range(c(tmpy1, tmpy2, tmpy1, tmpy2)) }
+  { ylim<-range(c(tmpy1, tmpy2, tmpy1, tmpy2), na.rm=TRUE) }
 
 
-  plotCluster(nn1, nn2, tmpx1, tmpy1, tmpx2, tmpy2, 
-              xlim, ylim, xlab, ylab, title, 
-              font, font.lab, cex, cex.lab, cex.main, lwd, 
-              lty1, lty2, pch1, pch2, col1, col2, type)
+  plotCluster(
+	      nn1 = nn1, 
+	      nn2 = nn2, 
+	      tmpx1 = tmpx1, 
+	      tmpy1 = tmpy1, 
+	      tmpx2 = tmpx2, 
+	      tmpy2 = tmpy2, 
+              xlim = xlim, 
+	      ylim = ylim, 
+	      xlab = xlab, 
+	      ylab = ylab, 
+	      title = title, 
+              font = font, 
+	      font.lab = font.lab, 
+	      cex = cex, 
+	      cex.lab = cex.lab, 
+	      cex.main = cex.main, 
+	      lwd = lwd, 
+              lty1 = lty1, 
+	      lty2 = lty2, 
+	      pch1 = pch1, 
+	      pch2 = pch2, 
+	      col1 = col1, 
+	      col2 = col2, 
+	      type = type)
  
-  plotTickLabel(xx1, xx2, L1,U1,L2,U2, 1, font,
-                lwd, lty1, lty2, col1, col2) #ticks and labels
+  plotTickLabel(
+		x1 = xx1, 
+		x2 = xx2, 
+		L1 = L1,
+		U1 = U1,
+		L2 = L2,
+		U2 = U2, 
+		axis = 1, 
+		font = font,
+                lwd = lwd, 
+		lty1 = lty1, 
+		lty2 = lty2, 
+		col1 = col1, 
+		col2 = col2) #ticks and labels
   invisible(list(sepVal=sepVal, projDir=projDir))
 }
 
 # function called by plot1DProjection and plot2DProjection
-plotCluster<-function(nn1, nn2, tmpx1, tmpy1, tmpx2, tmpy2, 
-                      xlim, ylim, xlab, ylab, title, 
-                      font, font.lab, cex, cex.lab, cex.main, lwd, 
-                      lty1, lty2, pch1, pch2, col1, col2, type="l")
+plotCluster<-function(
+		      nn1, 
+		      nn2, 
+		      tmpx1, 
+		      tmpy1, 
+		      tmpx2, 
+		      tmpy2, 
+                      xlim, 
+		      ylim, 
+		      xlab, 
+		      ylab, 
+		      title, 
+                      font, 
+		      font.lab, 
+		      cex, 
+		      cex.lab, 
+		      cex.main, 
+		      lwd, 
+                      lty1, 
+		      lty2, 
+		      pch1, 
+		      pch2, 
+		      col1, 
+		      col2, 
+		      type = "l")
 {
   if(nn1>1 && nn2>1)
   { plot(tmpx1, tmpy1, type=type, 
@@ -191,9 +264,21 @@ plotCluster<-function(nn1, nn2, tmpx1, tmpy1, tmpx2, tmpy2,
 # x1, x2 -- projected cluster 1 and 2 along the 1st axis
 # L1, U1 -- lower and upper 1-alpha/2 percentile of x1
 # L2, U2 -- lower and upper 1-alpha/2 percentile of x2
-plotTickLabel<-function(x1, x2, L1, U1, L2, U2, axis=1, font=2, lwd=4,
-                        lty1=1, lty2=2, col1=2, col2=4)
-{ axis(side=axis,at=x1, labels=FALSE, tick=TRUE,col=col1)
+plotTickLabel<-function(
+			x1, 
+			x2, 
+			L1, 
+			U1, 
+			L2, 
+			U2, 
+			axis = 1, 
+			font = 2, 
+			lwd = 4,
+                        lty1 = 1, 
+			lty2 = 2, 
+			col1 = 2, 
+			col2 = 4)
+{ axis(side = axis,at = x1, labels = FALSE, tick = TRUE,col = col1)
   axis(side=axis,at=x2, labels=FALSE, tick=TRUE,col=col2)
   par(mgp=c(3,2,0))
   axis(side=axis,at=c(L1, U1), labels=c("L1", "U1"), tick=TRUE,col=col1,
@@ -212,17 +297,34 @@ plotTickLabel<-function(x1, x2, L1, U1, L2, U2, axis=1, font=2, lwd=4,
 # alpha -- tuning parameter
 # xlab, ylab -- labels of x and y coordinates
 # title -- title of the plot
-plot2DProjection<-function(y1, y2, projDir, 
-  sepValMethod=c("normal", "quantile"), 
-  iniProjDirMethod=c("SL", "naive"), 
-  projDirMethod=c("newton", "fixedpoint"), 
-  xlim=NULL, ylim=NULL, 
-  xlab="1st projection direction", 
-  ylab="2nd projection direction", 
-  title="Scatter plot of 2-D Projected Clusters",
-  font=2, font.lab=2, cex=1.2, cex.lab=1, cex.main=1.5,
-  lwd=4, lty1=1, lty2=2, pch1=18, pch2=19, col1=2, col2=4, 
-  alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+plot2DProjection<-function(
+			   y1, 
+			   y2, 
+			   projDir, 
+                           sepValMethod = c("normal", "quantile"), 
+                           iniProjDirMethod = c("SL", "naive"), 
+                           projDirMethod = c("newton", "fixedpoint"), 
+                           xlim = NULL, 
+			   ylim = NULL, 
+                           xlab = "1st projection direction", 
+                           ylab = "2nd projection direction", 
+                           title = "Scatter plot of 2-D Projected Clusters",
+                           font = 2, 
+			   font.lab = 2, 
+			   cex = 1.2, 
+			   cex.lab = 1, 
+			   cex.main = 1.5,
+                           lwd = 4, 
+			   lty1 = 1, 
+			   lty2 = 2, 
+			   pch1 = 18, 
+			   pch2 = 19, 
+			   col1 = 2, 
+			   col2 = 4, 
+                           alpha = 0.05, 
+			   ITMAX = 20, 
+			   eps = 1.0e-10, 
+			   quiet = TRUE)
 { 
   sepValMethod<-match.arg(sepValMethod, choices=c("normal", "quantile"))
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
@@ -246,8 +348,16 @@ plot2DProjection<-function(y1, y2, projDir,
   }
 
   # obtain first two rotated coordinates
-  tmp<-getRotateData(y1, y2, projDir, iniProjDirMethod, projDirMethod,
-                     alpha, ITMAX, eps, quiet) 
+  tmp<-getRotateData(
+		     y1 = y1, 
+		     y2 = y2, 
+		     projDir = projDir, 
+		     iniProjDirMethod = iniProjDirMethod, 
+		     projDirMethod = projDirMethod,
+                     alpha = alpha, 
+		     ITMAX = ITMAX, 
+		     eps = eps, 
+		     quiet = quiet) 
   Q2<-tmp$Q2 # rotation matrix
   cl<-tmp$cl
   x<-tmp$x
@@ -370,25 +480,70 @@ plot2DProjection<-function(y1, y2, projDir,
   xlab<-paste(xlab," (sepValx=",round(sepValx,2),", alpha=", round(alpha,2), ")",sep="")
   ylab<-paste(ylab," (sepValy=",round(sepValy,2),", alpha=", round(alpha,2), ")",sep="")
 
-  if(missing(xlim)) { xlim<-range(tmpx) } 
+  if(missing(xlim)) { xlim<-range(tmpx, na.rm = TRUE) } 
   else { xlim<-xlim }
-  if(missing(ylim)) { ylim<-range(tmpy) } 
+  if(missing(ylim)) { ylim<-range(tmpy, na.rm = TRUE) } 
   else { ylim<-ylim }
 
-  xlim[1]<-min(xlim[1], Lx1, Lx2)
-  xlim[2]<-max(xlim[2], Ux1, Ux2)
-  ylim[1]<-min(ylim[1], Ly1, Ly2)
-  ylim[2]<-max(ylim[2], Uy1, Uy2)
+  xlim[1]<-min(xlim[1], Lx1, Lx2, na.rm = TRUE)
+  xlim[2]<-max(xlim[2], Ux1, Ux2, na.rm = TRUE)
+  ylim[1]<-min(ylim[1], Ly1, Ly2, na.rm = TRUE)
+  ylim[2]<-max(ylim[2], Uy1, Uy2, na.rm = TRUE)
 
-  plotCluster(n1, n2, xx1, yy1, xx2, yy2, 
-              xlim, ylim, xlab, ylab, title, 
-              font, font.lab, cex, cex.lab, cex.main, lwd, 
-              lty1, lty2, pch1, pch2, col1, col2, type="p")
+  plotCluster(
+	      nn1 = n1, 
+	      nn2 = n2, 
+	      tmpx1 = xx1, 
+	      tmpy1 = yy1, 
+	      tmpx2 = xx2, 
+	      tmpy2 = yy2, 
+              xlim = xlim, 
+	      ylim = ylim, 
+	      xlab = xlab, 
+	      ylab = ylab, 
+	      title = title, 
+              font = font, 
+	      font.lab = font.lab, 
+	      cex = cex, 
+	      cex.lab = cex.lab, 
+	      cex.main = cex.main, 
+	      lwd = lwd, 
+              lty1 = lty1, 
+	      lty2 = lty2, 
+	      pch1 = pch1, 
+	      pch2 = pch2, 
+	      col1 = col1, 
+	      col2 = col2, 
+	      type="p")
 
-  plotTickLabel(x1,x2,Lx1,Ux1,Lx2,Ux2, axis=1, font.lab, 
-                lwd, lty1, lty2, col1, col2) 
-  plotTickLabel(tmpy1,tmpy2,Ly1,Uy1,Ly2,Uy2, axis=2, font.lab, 
-                lwd, lty1, lty2, col1, col2) 
+  plotTickLabel(
+		x1 = x1,
+		x2 = x2,
+		L1 = Lx1,
+		U1 = Ux1,
+		L2 = Lx2,
+		U2 = Ux2, 
+		axis=1, 
+		font = font.lab, 
+                lwd = lwd, 
+		lty1 = lty1, 
+		lty2 = lty2, 
+		col1 = col1, 
+		col2 = col2) 
+  plotTickLabel(
+		x1 = tmpy1,
+		x2 = tmpy2,
+		L1 = Ly1,
+		U1 = Uy1,
+		L2 = Ly2,
+		U2 = Uy2, 
+		axis=2, 
+		font = font.lab, 
+                lwd = lwd, 
+		lty1 = lty1 , 
+		lty2 = lty2, 
+		col1 = col1, 
+		col2 = col2) 
 
   invisible(list(sepValx=sepValx, sepValy=sepValy, Q2=Q2))
 
@@ -398,11 +553,16 @@ plot2DProjection<-function(y1, y2, projDir,
 # y1, y2 -- clusters 1 and 2
 # projDir -- projection direction
 # alpha, ITMAX, eps, quiet -- same as other functions
-getRotateData<-function(y1, y2, projDir, 
-                        iniProjDirMethod=c("SL", "naive"), 
-                        projDirMethod=c("newton", "fixedpoint"), 
-                        alpha=0.05, ITMAX=10, 
-                        eps=1.0e-10, quiet=TRUE)
+getRotateData<-function(
+			y1, 
+			y2, 
+			projDir, 
+                        iniProjDirMethod = c("SL", "naive"), 
+                        projDirMethod = c("newton", "fixedpoint"), 
+                        alpha = 0.05, 
+			ITMAX = 10, 
+                        eps = 1.0e-10, 
+			quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -433,7 +593,7 @@ getRotateData<-function(y1, y2, projDir,
   if(p<2)
   { stop("Dimension should be greater than 2!\n") }
   # construct an orthogonal matrix whose first column is projDir 
-  Q<-MOrthogonal(projDir)
+  Q<-MOrthogonal(M = projDir)
   # rotate data
   ry<-y%*%Q
   if(p>2)
@@ -443,8 +603,15 @@ getRotateData<-function(y1, y2, projDir,
     if(n1>1){tmpy1<-ry1[cl==1,]}else{tmpy1<-matrix(ry1,nrow=1,ncol=p-1)}
     if(n2>1){tmpy2<-ry1[cl==1,]}else{tmpy2<-matrix(ry1,nrow=1,ncol=p-1)}
 
-    tmp<-projDirData(tmpy1, tmpy2, iniProjDirMethod, projDirMethod, 
-                alpha, ITMAX, eps, quiet)
+    tmp<-projDirData(
+		     y1 = tmpy1, 
+		     y2 = tmpy2, 
+		     iniProjDirMethod = iniProjDirMethod, 
+		     projDirMethod = projDirMethod, 
+                     alpha = alpha, 
+		     ITMAX = ITMAX, 
+		     eps = eps, 
+		     quiet = quiet)
     aa<-c(0, tmp$projDir) 
 
     aa<-as.vector(Q%*%aa) # aa^T a=0
@@ -475,11 +642,20 @@ getRotateData<-function(y1, y2, projDir,
 # projMethod -- indicates that we use our Eigen method "Eigen" or 
 #    method DMS of Dhillon, Modha, Spangler (2002) CSDA v 41, pp 59-90.
 # title -- the title of the plot.
-viewClusters<-function(y, cl, outlierLabel=0,
-  projMethod="Eigen", xlim=NULL, ylim=NULL,
-  xlab="1st projection direction", ylab="2nd projection direction", 
-  title="Scatter plot of 2-D Projected Clusters",
-  font=2, font.lab=2, cex=1.2, cex.lab=1.2) 
+viewClusters<-function(
+		       y, 
+		       cl, 
+		       outlierLabel = 0,
+                       projMethod = "Eigen", 
+		       xlim = NULL, 
+		       ylim = NULL,
+                       xlab = "1st projection direction", 
+		       ylab = "2nd projection direction", 
+                       title = "Scatter plot of 2-D Projected Clusters",
+                       font = 2, 
+		       font.lab = 2, 
+		       cex = 1.2, 
+		       cex.lab = 1.2) 
 { 
   projMethod<-match.arg(projMethod, choices=c("Eigen", "DMS"))
 
@@ -500,8 +676,14 @@ viewClusters<-function(y, cl, outlierLabel=0,
 
   # project data to the 2-dimensional space spanned by the first 2 
   # eigenvectors of the between cluster distance matrix B.
-  if(projMethod=="DMS") { tmp<-DMSProj(y2, cl2, outlierLabel) }
-  else { tmp<-eigenProj(y2, cl2, outlierLabel) }
+  if(projMethod=="DMS") { tmp<-DMSProj(
+				       y = y2, 
+				       cl = cl2, 
+				       outlierLabel = outlierLabel) }
+  else { tmp<-eigenProj(
+			y = y2, 
+			cl = cl2, 
+			outlierLabel = outlierLabel) }
   #ev<-tmp$ev # eigenvalues of the matrix B
   Q<-tmp$Q # the all eigenvectors of B
   B<-tmp$B # the between distance matrix B
@@ -546,7 +728,10 @@ viewClusters<-function(y, cl, outlierLabel=0,
 # y -- nxp data points
 # cl -- a partition of the n data points in y
 # outlierLabel -- integer (default 0) for detected outliers
-eigenProj<-function(y,cl, outlierLabel=0)
+eigenProj<-function(
+		    y,
+		    cl, 
+		    outlierLabel = 0)
 { y<-as.matrix(y); p<-ncol(y);
   # remove outliers
   out.label<-which(cl==outlierLabel)
@@ -605,7 +790,10 @@ eigenProj<-function(y,cl, outlierLabel=0)
 # y -- nxp data points
 # cl -- a partition of the n data points in y
 # outlierLabel -- integer (default 0) for detected outliers
-DMSProj<-function(y, cl, outlierLabel=0)
+DMSProj<-function(
+		  y, 
+		  cl, 
+		  outlierLabel = 0)
 { y<-as.matrix(y)
   p<-ncol(y);
   # remove outliers

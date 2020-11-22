@@ -5,7 +5,7 @@
 Generate a random correlation matrix based on random partial correlations.
 }
 \usage{
-  rcorrmatrix(d,alphad=1)
+  rcorrmatrix(d, alphad = 1)
 }
 \arguments{
   \item{d}{
@@ -36,7 +36,7 @@ Harry Joe \email{harry@stat.ubc.ca}
 \examples{
 rcorrmatrix(3)
 rcorrmatrix(5)
-rcorrmatrix(5,alphad=2.5)
+rcorrmatrix(5, alphad = 2.5)
 }
 \keyword{cluster}
 

@@ -98,9 +98,14 @@ Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{
-genPositiveDefMat("unifcorrmat",dim = 4)
+genPositiveDefMat(
+		  dim = 4, 
+		  covMethod = "unifcorrmat")
 
-aa <- genPositiveDefMat("eigen", eigenvalue = c(3, 2, 1), dim=3)
+aa <- genPositiveDefMat(
+			dim = 3,
+			covMethod = "eigen", 
+			eigenvalue = c(3, 2, 1))
 print(aa)
 print(eigen(aa$Sigma))
 

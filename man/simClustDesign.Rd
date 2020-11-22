@@ -10,35 +10,36 @@ The covariance matrices of clusters can have arbitrary diameters, shapes
 and orientations.
 }
 \usage{
-simClustDesign(numClust=c(3,6,9), 
-               sepVal=c(0.01, 0.21, 0.342), 
-               sepLabels=c("L", "M", "H"), 
-               numNonNoisy=c(4,8,20), 
-               numNoisy=NULL, 
-               numOutlier=0, 
-               numReplicate=3, 
-               fileName="test", 
-               clustszind=2, 
-               clustSizeEq=50, 
-               rangeN=c(50,200), 
-               clustSizes=NULL,
-               covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
-               rangeVar=c(1, 10), 
-               lambdaLow=1, 
-               ratioLambda=10, 
-               alphad=1, 
-               eta=1, 
-               rotateind=TRUE, 
-               iniProjDirMethod=c("SL", "naive"), 
-               projDirMethod=c("newton", "fixedpoint"), 
-               alpha=0.05, 
-               ITMAX=20, 
-               eps=1.0e-10, 
-               quiet=TRUE, 
-               outputDatFlag=TRUE, 
-               outputLogFlag=TRUE, 
-               outputEmpirical=TRUE, 
-               outputInfo=TRUE)
+simClustDesign(numClust = c(3,6,9), 
+               sepVal = c(0.01, 0.21, 0.342), 
+               sepLabels = c("L", "M", "H"), 
+               numNonNoisy = c(4,8,20), 
+               numNoisy = NULL, 
+               numOutlier = 0, 
+               numReplicate = 3, 
+               fileName = "test", 
+               clustszind = 2, 
+               clustSizeEq = 50, 
+               rangeN = c(50,200), 
+               clustSizes = NULL,
+               covMethod = c("eigen", "onion", "c-vine", "unifcorrmat"), 
+	       eigenvalue = NULL,
+               rangeVar = c(1, 10), 
+               lambdaLow = 1, 
+               ratioLambda = 10, 
+               alphad = 1, 
+               eta = 1, 
+               rotateind = TRUE, 
+               iniProjDirMethod = c("SL", "naive"), 
+               projDirMethod = c("newton", "fixedpoint"), 
+               alpha = 0.05, 
+               ITMAX = 20, 
+               eps = 1.0e-10, 
+               quiet = TRUE, 
+               outputDatFlag = TRUE, 
+               outputLogFlag = TRUE, 
+               outputEmpirical = TRUE, 
+               outputInfo = TRUE)
 }
 \arguments{
   \item{numClust}{
@@ -133,6 +134,9 @@ set the default value of \code{clustSizes} as \code{NULL}.
 Method to generate covariance matrices for clusters (see details).
 The default method is 'eigen' so that the user can directly 
 specify the range of the \dfn{diameters} of clusters.
+  }
+    \item{eigenvalue}{
+numeric. user-specified eigenvalues when \code{covMethod = "eigen"}. If \code{eigenvalue = NULL} and \code{covMethod = "eigen"}, then eigenvalues will be automatically generated.  
   }
   \item{rangeVar}{
 Range for variances of a covariance matrix (see details).
@@ -368,13 +372,15 @@ Weiliang Qiu \email{weiliang.qiu@gmail.com}\cr
 Harry Joe \email{harry@stat.ubc.ca}
 }
 \examples{
-\dontrun{tmp<-simClustDesign(numClust=3, 
-              sepVal=c(0.01,0.21), 
-              sepLabels=c("L","M"), 
-              numNonNoisy=4, 
-              numOutlier=0, 
-              numReplicate=2, 
-              clustszind=2)}
+\dontrun{
+tmp <- simClustDesign(
+		      numClust = 3, 
+                      sepVal = c(0.01, 0.21), 
+                      sepLabels = c("L", "M"), 
+                      numNonNoisy = 4, 
+                      numOutlier = 0, 
+                      numReplicate = 2, 
+                      clustszind = 2)}
 }
 \keyword{cluster}
 

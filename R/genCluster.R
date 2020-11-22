@@ -212,33 +212,34 @@
 #      The file name has the format [fileName]_info.log
 #############
 genRandomClust<-function(numClust, 
-                         sepVal=0.01, 
-                         numNonNoisy=2, 
-                         numNoisy=0, 
-                         numOutlier=0, 
-                         numReplicate=3, 
-                         fileName="test",  
-                         clustszind=2, 
-                         clustSizeEq=50, 
-                         rangeN=c(50,200), 
-                         clustSizes=NULL, 
-                         covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
-                         rangeVar=c(1, 10), 
-                         lambdaLow=1, 
-                         ratioLambda=10,  
-                         alphad=1,
-                         eta=1,
-                         rotateind=TRUE, 
-                         iniProjDirMethod=c("SL", "naive"), 
-                         projDirMethod=c("newton", "fixedpoint"), 
-                         alpha=0.05, 
-                         ITMAX=20, 
-                         eps=1.0e-10, 
-                         quiet=TRUE, 
-                         outputDatFlag=TRUE,
-                         outputLogFlag=TRUE,
-                         outputEmpirical=TRUE, 
-                         outputInfo=TRUE)
+                         sepVal = 0.01, 
+                         numNonNoisy = 2, 
+                         numNoisy = 0, 
+                         numOutlier = 0, 
+                         numReplicate = 3, 
+                         fileName = "test",  
+                         clustszind = 2, 
+                         clustSizeEq = 50, 
+                         rangeN = c(50,200), 
+                         clustSizes = NULL, 
+                         covMethod = c("eigen", "onion", "c-vine", "unifcorrmat"), 
+			 eigenvalue  =  NULL, 
+                         rangeVar = c(1, 10), 
+                         lambdaLow = 1, 
+                         ratioLambda = 10,  
+                         alphad = 1,
+                         eta = 1,
+                         rotateind = TRUE, 
+                         iniProjDirMethod = c("SL", "naive"), 
+                         projDirMethod = c("newton", "fixedpoint"), 
+                         alpha = 0.05, 
+                         ITMAX = 20, 
+                         eps = 1.0e-10, 
+                         quiet = TRUE, 
+                         outputDatFlag = TRUE,
+                         outputLogFlag = TRUE,
+                         outputEmpirical = TRUE, 
+                         outputInfo = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -395,8 +396,14 @@ genRandomClust<-function(numClust,
     # total number of dimension
     p<-numNonNoisy+numNoisy
     # generate membership and cluster sizes
-    tmpmem<-genMemSize(clustszind, numClust, clustSizeEq, 
-                       rangeN, clustSizes, p, quiet)
+    tmpmem<-genMemSize(
+		       clustszind = clustszind, 
+		       G = numClust, 
+		       clustSizeEq = clustSizeEq, 
+                       rangeN = rangeN, 
+		       clustSizes = clustSizes, 
+		       p = p, 
+		       quiet = quiet)
     # mem is the set of the memberships of data points
     mem<-tmpmem$mem
     # size are the numbers of data points in clusters
@@ -408,11 +415,23 @@ genRandomClust<-function(numClust,
       cat(" *** Step 2.2: Generate covariance matrices ***\n") 
     }
     # generate covariance matrices
-    tmpms<-genMeanCov(numNonNoisy,numClust,
-                      rangeVar, sepVal, lambdaLow,
-                      ratioLambda, covMethod, alphad, eta, 
-                      iniProjDirMethod, projDirMethod, 
-                      alpha, ITMAX, eps, quiet) 
+    tmpms<-genMeanCov(
+		      numNonNoisy = numNonNoisy,
+		      G = numClust,
+                      rangeVar = rangeVar, 
+		      sepVal = sepVal, 
+		      lambdaLow = lambdaLow,
+                      ratioLambda = ratioLambda, 
+		      covMethod = covMethod, 
+		      eigenvalue = eigenvalue,
+		      alphad = alphad, 
+		      eta = eta, 
+                      iniProjDirMethod = iniProjDirMethod, 
+		      projDirMethod = projDirMethod, 
+                      alpha = alpha, 
+		      ITMAX = ITMAX, 
+		      eps = eps, 
+		      quiet = quiet) 
     #generate mean and cov
     # 'thetaMat' is a 'numClust' by 'numNonNoisy' matrix 
     # i-th row is the mean vector for the i-th cluster
@@ -441,9 +460,20 @@ genRandomClust<-function(numClust,
     # cluster fractions
     mypi<-size/sum(size, na.rm=TRUE)
     # Obtain the mean vector and covariance matrix for noisy variables
-    tmp<-genNoisyMeanCov(numNoisy, mypi, numClust, numNonNoisy, 
-                         thetaMat, s, covMethod, alphad, eta, rangeVar, 
-                         eps, quiet)
+    tmp<-genNoisyMeanCov(
+			 numNoisy = numNoisy, 
+			 mypi = mypi, 
+			 G = numClust, 
+			 numNonNoisy = numNonNoisy, 
+                         thetaMat = thetaMat, 
+			 s = s, 
+			 covMethod = covMethod, 
+			 eigenvalue = eigenvalue,
+			 alphad = alphad, 
+			 eta = eta, 
+			 rangeVar = rangeVar, 
+                         eps = eps, 
+			 quiet = quiet)
     # 'thetaMat' is a 'numClust' by 'p' matrix 
     # i-th row is the mean vector for the i-th cluster
     thetaMat<-tmp$thetaMat 
@@ -454,8 +484,14 @@ genRandomClust<-function(numClust,
     p<-tmp$p 
     # update mean vectors and covariance matrices of variables
     # e.g. rotating data and randomizing the order of variables
-    tmp<-updateMeanCov(rotateind, thetaMat, s, numClust, p, 
-                       numNoisy, quiet)
+    tmp<-updateMeanCov(
+		       rotateind = rotateind, 
+		       thetaMat = thetaMat, 
+		       s = s, 
+		       G = numClust, 
+		       p = p, 
+                       numNoisy = numNoisy, 
+		       quiet = quiet)
     # 'muMat' is a 'numClust' by 'p' matrix 
     # i-th row is the mean vector for the i-th cluster
     muMat<-tmp$muMat
@@ -472,15 +508,30 @@ genRandomClust<-function(numClust,
     }
     # generate data based on the mean vectors, covariance matrices
     # and cluster sizes.
-    y<-genData(mem, N, numClust, p, muMat, SigmaArray, size, quiet)
+    y<-genData(
+	       mem = mem, 
+	       N = N, 
+	       G = numClust, 
+	       p = p, 
+	       muMat = muMat, 
+	       SigmaArray = SigmaArray, 
+	       size = size, 
+	       quiet = quiet)
 
     if(!quiet)
     { cat(" *********** data set >> ", datafileName, " *************\n")
       cat(" *** Step 2.4: Get separation indices and projection directions ***\n") 
     }
     # get the theoretical separation index and projection direction
-    tmpsep<-getSepProjTheory(muMat, SigmaArray, iniProjDirMethod, 
-                             projDirMethod, alpha, ITMAX, eps, quiet)
+    tmpsep<-getSepProjTheory(
+			     muMat = muMat, 
+			     SigmaArray = SigmaArray, 
+			     iniProjDirMethod = iniProjDirMethod, 
+                             projDirMethod = projDirMethod, 
+			     alpha = alpha, 
+			     ITMAX = ITMAX, 
+			     eps = eps, 
+			     quiet = quiet)
     # 'sepValMat' is a 'numClust' by 'numClust' matrix
     # 'sepValMat[i,j]' is the separation index between clusters i and j
     sepValMat<-tmpsep$sepValMat
@@ -489,7 +540,15 @@ genRandomClust<-function(numClust,
     myprojDir<-tmpsep$projDirArray
     if(outputEmpirical)
     { # get empirical separation indices and projection directions
-      tmp<-getSepProjData(y, mem, iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet)
+      tmp<-getSepProjData(
+			  y = y, 
+			  cl = mem, 
+			  iniProjDirMethod = iniProjDirMethod, 
+			  projDirMethod = projDirMethod, 
+			  alpha = alpha, 
+			  ITMAX = ITMAX, 
+			  eps = eps, 
+			  quiet = quiet)
       # 'Jhat2' is a 'numClust' by 'numClust' matrix
       # 'Jhat2[i,j]' is the separation index between clusters i and j
       Jhat2<-tmp$sepValMat
@@ -507,7 +566,7 @@ genRandomClust<-function(numClust,
       cat(" *** Step 2.5: Generating outliers ***\n") 
     }
     # Generate outliers
-    tmpout<-genOutliers(numOutlier, y)
+    tmpout<-genOutliers(numOutlier = numOutlier, y = y)
     # number of outliers
     nOut<-tmpout$nOut
     # 'y.out' is a 'nOut' by 'p' matrix, where 'nOut' is the number of outliers
@@ -525,10 +584,30 @@ genRandomClust<-function(numClust,
     }
     # output log information, e.g. mean vectors and covariance matrices, etc.
     if(outputLogFlag)
-    { outputLog(b, fileName, alpha, sepVal, numClust, size,
-        N, p, numNoisy, noisySet, nOut, thetaMat, s, muMat, SigmaArray, Q, 
-        sepValMat, Jhat2, myprojDir, empProjDir, egvaluesMat, 
-        quiet, outputEmpirical) 
+    { outputLog(
+		b = b, 
+		fileName = fileName, 
+		alpha = alpha, 
+		sepVal = sepVal, 
+		G = numClust, 
+		size = size,
+                N = N, 
+		p = p, 
+		numNoisy = numNoisy, 
+		noisySet = noisySet, 
+		nOut = nOut, 
+		thetaMat = thetaMat, 
+		s = s, 
+		muMat = muMat, 
+		SigmaArray = SigmaArray, 
+		Q = Q, 
+                sepValMat = sepValMat, 
+		Jhat2 = Jhat2, 
+		myprojDir = myprojDir, 
+		empProjDir = empProjDir, 
+		egvaluesMat = egvaluesMat, 
+                quiet = quiet, 
+		outputEmpirical = outputEmpirical) 
     }
     # output data set
 
@@ -551,7 +630,7 @@ genRandomClust<-function(numClust,
     infoMatTheory<-neighbors.mat
     if(outputEmpirical)
     { # for empirical values, we get the corresponding 'numClust' by '6' matrix
-      infoMatData<-nearestNeighborSepVal(Jhat2) 
+      infoMatData<-nearestNeighborSepVal(sepValMat = Jhat2) 
     } else {
       infoMatData<-NULL
     }
@@ -565,7 +644,12 @@ genRandomClust<-function(numClust,
       else { infoFrameData<-NULL }
       fileNameVec<-c(fileNameVec, rep(paste(fileName, "_", b, sep=""), nn))
 
-      datList[[b]]<-outputData(b, fileName, y, p, outputDatFlag) 
+      datList[[b]]<-outputData(
+			       b = b, 
+			       fileName = fileName, 
+			       y = y, 
+			       p = p, 
+			       outputDatFlag = outputDatFlag) 
       memList[[b]]<-mem 
       noisyList[[b]]<-noisySet 
     } else { # the first data set
@@ -574,7 +658,12 @@ genRandomClust<-function(numClust,
       { infoFrameData<- infoMatData }
       else { infoFrameData<-NULL }
       fileNameVec<-rep(paste(fileName, "_", b, sep=""), nn)
-      datList<-list(outputData(b, fileName, y, p, outputDatFlag)) 
+      datList<-list(outputData(
+			       b = b, 
+			       fileName = fileName, 
+			       y = y, 
+			       p = p, 
+			       outputDatFlag = outputDatFlag)) 
       memList<-list(mem)
       noisyList<-list(noisySet)
     } 
@@ -681,7 +770,7 @@ genShiftedVertexes<-function(G, numNonNoisy)
   }
  
   # First get numNonNoisy+1 vertices in a numNonNoisy-dimensional space
-  vertex<-genVertexes(numNonNoisy)
+  vertex<-genVertexes(numNonNoisy = numNonNoisy)
   if(G<=numNonNoisy+1) 
   { 
     return(vertex[1:G,]) 
@@ -728,11 +817,22 @@ genShiftedVertexes<-function(G, numNonNoisy)
 # See documentation of genRandomClust for explanation of arguments:
 # rangeVar, sepVal, lambdaLow, ratioLambda, covMethod, iniProjDirMethod, 
 # projDirMethod, alpha, ITMAX, eps, quiet
-genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1, 
-                     ratioLambda=10, covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"),
-                     alphad=1, eta=1, iniProjDirMethod=c("SL", "naive"), 
+genMeanCov<-function(numNonNoisy, 
+		     G, 
+		     rangeVar, 
+		     sepVal, 
+		     lambdaLow=1, 
+                     ratioLambda=10, 
+		     covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"),
+		     eigenvalue = eigenvalue,
+                     alphad=1, 
+		     eta=1, 
+		     iniProjDirMethod=c("SL", "naive"), 
                      projDirMethod=c("newton", "fixedpoint"),
-                     alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+                     alpha=0.05, 
+		     ITMAX=20, 
+		     eps=1.0e-10, 
+		     quiet=TRUE)
 { 
   covMethod<-match.arg(arg=covMethod, choices=c("eigen", "onion", "c-vine", "unifcorrmat"))
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
@@ -797,8 +897,15 @@ genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1,
   { thetaMat<-matrix(0, nrow=1, ncol=numNonNoisy)
     rownames(thetaMat)<-"cluster1"
     colnames(thetaMat)<-paste("variable", 1:numNonNoisy, "\n")
-    tmp<-genPositiveDefMat(numNonNoisy, covMethod, alphad, eta, rangeVar, 
-         lambdaLow, ratioLambda)
+    tmp<-genPositiveDefMat(
+			   dim = numNonNoisy, 
+			   covMethod = covMethod, 
+			   eigenvalue = eigenvalue,
+			   alphad = alphad, 
+			   eta = eta, 
+			   rangeVar = rangeVar, 
+                           lambdaLow = lambdaLow, 
+			   ratioLambda = ratioLambda)
     s[,,1]<-tmp$Sigma
     egvaluesMat[1,]<-tmp$egvalue
     # The scalar 'A' is for the length of the simplex, 
@@ -817,7 +924,15 @@ genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1,
     a[1]<-1
     asa<-rep(0, G); # sqrt(a^T s a)
     for(i in 1:G) # generate covariance matrices
-    { tmp<-genPositiveDefMat(numNonNoisy, covMethod, alphad, eta, rangeVar, lambdaLow, ratioLambda) 
+    { tmp<-genPositiveDefMat(
+			     dim = numNonNoisy, 
+			     covMethod = covMethod, 
+			     eigenvalue = eigenvalue,
+			     alphad = alphad, 
+			     eta = eta, 
+			     rangeVar = rangeVar, 
+			     lambdaLow = lambdaLow, 
+			     ratioLambda = ratioLambda) 
       s[,,i]<-tmp$Sigma
       asa[i]<-sqrt(as.vector(t(a)%*%s[,,i]%*%a)) # the sd of projected data
       egvaluesMat[i,]<-tmp$egvalues
@@ -842,18 +957,35 @@ genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1,
     for(gg in 1:G)
     { eg<-eigen(s[,,gg])$values
     }
-    tmp<-getA2(G, s, sepVal, A2, 
-        iniProjDirMethod, projDirMethod, alpha, ITMAX, eps) # get value of A
+    tmp<-getA2(
+	       G = G, 
+	       sArray = s, 
+	       sepVal = sepVal, 
+	       A2 = A2, 
+               iniProjDirMethod = iniProjDirMethod, 
+	       projDirMethod = projDirMethod, 
+	       alpha = alpha, 
+	       ITMAX = ITMAX, 
+	       eps = eps,
+	       quiet = quiet) # get value of A
     if(!quiet)
     { cat(" *** Step 2.3:  Generate mean vectors for clusters ***\n") }
     A<-tmp$minA
     thetaMat<-A*tmp$vertex # obtain the centers of the clusters
 
-    tmp<-getSepProjTheory(thetaMat, s, iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet)
+    tmp<-getSepProjTheory(
+			  muMat = thetaMat, 
+			  SigmaArray = s, 
+			  iniProjDirMethod = iniProjDirMethod, 
+			  projDirMethod = projDirMethod, 
+			  alpha = alpha, 
+			  ITMAX = ITMAX, 
+			  eps = eps, 
+			  quiet = quiet)
     sepValMat<-tmp$sepValMat
     #projDirArray<-tmp$projDirArray
     d<-as.matrix(dist(thetaMat))
-    neighbors.mat<-nearestNeighbor(d, A, sepValMat)
+    neighbors.mat<-nearestNeighbor(d = d, A = A, sepValMat = sepValMat)
     if(!quiet)
     { # output intermediate results
       cat("true sepVal=", sepVal, "\n")
@@ -911,10 +1043,16 @@ genMeanCov<-function(numNonNoisy, G, rangeVar, sepVal, lambdaLow=1,
 # sepVal -- the minimum separation index set as a priori
 # See documentation of genRandomClust for explanation of arguments:
 # iniProjDirMethod, projDirMethod, alpha, ITMAX, eps
-refineCov<-function(thetaMat, s, A, sepVal, 
-                    iniProjDirMethod=c("SL", "naive"), 
-                    projDirMethod=c("newton", "fixedpoint"), 
-                    alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+refineCov<-function(thetaMat, 
+		    s, 
+		    A, 
+		    sepVal, 
+                    iniProjDirMethod = c("SL", "naive"), 
+                    projDirMethod = c("newton", "fixedpoint"), 
+                    alpha = 0.05, 
+		    ITMAX = 20, 
+		    eps = 1.0e-10, 
+		    quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -947,7 +1085,16 @@ refineCov<-function(thetaMat, s, A, sepVal,
     # the separation index of each cluster to its nearest neighboring
     # cluster. Then we choose the cluster whose minimum separation index is
     # the largest.
-    tmp<-neighborsMaxMin(thetaMat, s, A, iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet)
+    tmp<-neighborsMaxMin(
+			 thetaMat = thetaMat, 
+			 s = s, 
+			 A = A, 
+			 iniProjDirMethod = iniProjDirMethod, 
+			 projDirMethod = projDirMethod, 
+			 alpha = alpha, 
+			 ITMAX = ITMAX, 
+			 eps = eps, 
+			 quiet = quiet)
     k.maxmin<-tmp$k.maxmin
     neighbors.maxmin<-tmp$neighbors.maxmin 
     if(k.maxmin==k.max.old) { break }
@@ -966,17 +1113,33 @@ refineCov<-function(thetaMat, s, A, sepVal,
 
     # search the upper bound of the myc so that the minimum separation index
     # after scaling is smaller than the true value sepVal
-    myupper<-findUpperC(theta, Sigma, sepVal, iniProjDirMethod,
-                        projDirMethod, alpha, ITMAX, eps, quiet)
+    myupper<-findUpperC(
+			thetaMat = theta, 
+			s = Sigma, 
+			sepVal = sepVal, 
+			iniProjDirMethod = iniProjDirMethod,
+                        projDirMethod = projDirMethod, 
+			alpha = alpha, 
+			ITMAX = ITMAX, 
+			eps = eps, 
+			quiet = quiet)
     # find a suitable scalar myc such that the minimum separation index of
     # the cluster k.maxmin is equal to sepVal.
     newfit<-0
     class(newfit)<-"try-error"
     newfit<-try(
-         tmp<-uniroot(f=diffSepVal, lower=0.9, upper=myupper, 
-      thetaMat=theta, s=Sigma, sepVal=sepVal, 
-      iniProjDirMethod=iniProjDirMethod, projDirMethod=projDirMethod, 
-      alpha=alpha, ITMAX=ITMAX, eps=eps, quiet=quiet)
+         tmp<-uniroot(f = diffSepVal, 
+		      lower = 0.9, 
+		      upper = myupper, 
+                      thetaMat = theta, 
+		      s = Sigma, 
+		      sepVal = sepVal, 
+                      iniProjDirMethod = iniProjDirMethod, 
+		      projDirMethod = projDirMethod, 
+                      alpha = alpha, 
+		      ITMAX = ITMAX, 
+		      eps = eps, 
+		      quiet = quiet)
     )
     if(sum(class(newfit)=="try-error", na.rm=TRUE))
     { warning("Could not find suitable upper bound of 'myc'!\n 'myc' is set to be 'myupper'!\n")
@@ -1008,10 +1171,16 @@ refineCov<-function(thetaMat, s, A, sepVal,
 #     specified covariance matrices is equal to 'sepVal'.
 # See documentation of genRandomClust for explanation of arguments:
 # iniProjDirMethod, projDirMethod, alpha, eps, ITMAX, quiet
-neighborsMaxMin<-function(thetaMat, s, A, 
-                          iniProjDirMethod=c("SL", "naive"), 
-                          projDirMethod=c("newton", "fixedpoint"), 
-                          alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+neighborsMaxMin<-function(
+			  thetaMat, 
+			  s, 
+			  A, 
+                          iniProjDirMethod = c("SL", "naive"), 
+                          projDirMethod = c("newton", "fixedpoint"), 
+                          alpha = 0.05, 
+			  ITMAX = 20, 
+			  eps = 1.0e-10, 
+			  quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -1033,11 +1202,22 @@ neighborsMaxMin<-function(thetaMat, s, A,
   numClust<-nrow(thetaMat)
   p<-ncol(thetaMat)
   # calculate the separation index matrix
-  tmp<-getSepProjTheory(thetaMat, s, iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet)
+  tmp<-getSepProjTheory(
+			muMat = thetaMat, 
+			SigmaArray = s, 
+			iniProjDirMethod = iniProjDirMethod, 
+			projDirMethod = projDirMethod, 
+			alpha = alpha, 
+			ITMAX = ITMAX, 
+			eps = eps, 
+			quiet = quiet)
   sepValMat<-tmp$sepValMat
   # Find neighboring clusters of each cluster and find the cluster whose
   # minimum separation index with its neighboring clusters is the largest.
-  tmp<-findNeighbors(d, A, sepValMat)
+  tmp<-findNeighbors(
+		     d = d, 
+		     A = A, 
+		     sepValMat = sepValMat)
   k.maxmin<-tmp$k.maxmin; # the cluster which we are interested in
   maxminJ<-tmp$maxminJ; # the maximum minimum separation index
   neighbors<-tmp$neighbors # neighboring clusters of each cluster
@@ -1076,10 +1256,16 @@ neighborsMaxMin<-function(thetaMat, s, A,
 # sepVal -- the minimum separation index set as a priori
 # See documentation of genRandomClust for explanation of arguments:
 # alpha, iniProjDirMethod, projDirMethod, ITMAX, eps, quiet
-findUpperC<-function(thetaMat, s, sepVal, 
-                     iniProjDirMethod=c("SL", "naive"), 
-                     projDirMethod=c("newton", "fixedpoint"), 
-                     alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+findUpperC<-function(
+		     thetaMat, 
+		     s, 
+		     sepVal, 
+                     iniProjDirMethod = c("SL", "naive"), 
+                     projDirMethod = c("newton", "fixedpoint"), 
+                     alpha = 0.05, 
+		     ITMAX = 20, 
+		     eps = 1.0e-10, 
+		     quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -1105,7 +1291,15 @@ findUpperC<-function(thetaMat, s, sepVal,
     # scale the covariance matrix of the first cluster
     tmps[,,1]<-myc*s[,,1]
     # calculate the separation index matrix
-    tmp<-getSepProjTheory(thetaMat, tmps, iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet)
+    tmp<-getSepProjTheory(
+			  muMat = thetaMat, 
+			  SigmaArray = tmps, 
+			  iniProjDirMethod = iniProjDirMethod, 
+			  projDirMethod = projDirMethod, 
+			  alpha = alpha, 
+			  ITMAX = ITMAX, 
+			  eps = eps, 
+			  quiet = quiet)
     sepValMat<-tmp$sepValMat
     sepVal1<-sepValMat[1,]
     sepVal1[1]<-1
@@ -1131,10 +1325,17 @@ findUpperC<-function(thetaMat, s, sepVal,
 # sepVal -- the minimum separation index set as a priori
 # See documentation of genRandomClust for explanation of arguments:
 # alpha, iniProjDirMethod, projDirMethod, ITMAX, eps, quiet
-diffSepVal<-function(myc, thetaMat, s, sepVal, 
-                    iniProjDirMethod=c("SL", "naive"), 
-                    projDirMethod=c("newton", "fixedpoint"), 
-                    alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+diffSepVal<-function(
+		     myc, 
+		     thetaMat, 
+		     s, 
+		     sepVal, 
+                     iniProjDirMethod = c("SL", "naive"), 
+                     projDirMethod = c("newton", "fixedpoint"), 
+                     alpha = 0.05, 
+		     ITMAX = 20, 
+		     eps = 1.0e-10, 
+		     quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -1160,7 +1361,15 @@ diffSepVal<-function(myc, thetaMat, s, sepVal,
   tmps[,,1]<-myc*tmps[,,1]
   numClust<-nrow(thetaMat)
   p<-ncol(thetaMat)
-  tmp<-getSepProjTheory(thetaMat, tmps, iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet)
+  tmp<-getSepProjTheory(
+			muMat = thetaMat, 
+			SigmaArray = tmps, 
+			iniProjDirMethod = iniProjDirMethod, 
+			projDirMethod = projDirMethod, 
+			alpha = alpha, 
+			ITMAX = ITMAX, 
+			eps = eps, 
+			quiet = quiet)
   sepValMat<-tmp$sepValMat
   sepVal1<-sepValMat[1,]
   sepVal1[1]<-1
@@ -1174,7 +1383,10 @@ diffSepVal<-function(myc, thetaMat, s, sepVal,
 # dk[k,k]=0, i.e. the distance from cluster k to itself is zero.
 # A -- scalar so that the minimum separation index among clusters is equal
 #      to sepVal
-myNeighbor<-function(d, k, A)
+myNeighbor<-function(
+		     d, 
+		     k, 
+		     A)
 { 
   k<-as.integer(k)
   if(k<0 || !is.integer(k))
@@ -1210,7 +1422,10 @@ myNeighbor<-function(d, k, A)
 # A -- scalar so that the minimum separation index among clusters is equal
 #      to sepVal
 # sepValMat -- the separation index matrix
-findNeighbors<-function(d, A, sepValMat)
+findNeighbors<-function(
+			d, 
+			A, 
+			sepValMat)
 { 
   tmp<-as.vector(d)
   len<-length(tmp)
@@ -1241,14 +1456,20 @@ findNeighbors<-function(d, A, sepValMat)
 
   numClust<-nrow(sepValMat)
   # find the neighboring clusters of the first cluster
-  neighbors<-list(myNeighbor(d, 1, A))
+  neighbors<-list(myNeighbor(
+			     d = d, 
+			     k = 1, 
+			     A = A))
   # the separation indices between 1st cluster and its neighboring clusters
   sepVal.neighbors<-list(sepValMat[1,neighbors[[1]]])
   tmpJ<-as.vector(sepVal.neighbors[[1]])
   maxminJ<-min(tmpJ, na.rm=TRUE)
   k.maxmin<-1
   for(k in 2:numClust)
-  { neighbors[[k]]<-myNeighbor(d, k, A) 
+  { neighbors[[k]]<-myNeighbor(
+			       d = d, 
+			       k = k, 
+			       A = A) 
     sepVal.neighbors[[k]]<-sepValMat[k,neighbors[[k]]]
     tmpJ<-as.vector(sepVal.neighbors[[k]])
     tmpminJ<-min(tmpJ, na.rm=TRUE)
@@ -1325,7 +1546,10 @@ nearestNeighborSepVal<-function(sepValMat)
 # A -- scalar so that the minimum separation index among clusters is equal
 #      to sepVal
 # sepValMat -- the separation index matrix
-nearestNeighbor<-function(d, A, sepValMat)
+nearestNeighbor<-function(
+			  d, 
+			  A, 
+			  sepValMat)
 { # 1st column has the labels of clusters
   # 2nd column has the labels of its nearest neighboring cluster
   # 3rd column has the separation indices of the clusters to their nearest
@@ -1342,7 +1566,10 @@ nearestNeighbor<-function(d, A, sepValMat)
   neighbors.mat[,1]<-1:numClust
   # find neighbors of 1st cluster
   for(k in 1:numClust)
-  { neighbork<-myNeighbor(d, k, A)
+  { neighbork<-myNeighbor(
+			  d = d, 
+			  k = k, 
+			  A = A)
     tmpJ<-as.vector(sepValMat[k,neighbork])
     maxJ<-max(tmpJ, na.rm=TRUE)
     pos.max<-neighbork[which(tmpJ==maxJ)]
@@ -1379,7 +1606,14 @@ nearestNeighbor<-function(d, A, sepValMat)
 # p -- number of variables (non-noisy and noisy variables)
 # quiet -- a flag to switch on/off the outputs of intermediate results.
 #          The default value is 'TRUE'.
-genMemSize<-function(clustszind, G, clustSizeEq, rangeN, clustSizes, p, quiet=TRUE)
+genMemSize<-function(
+		     clustszind, 
+		     G, 
+		     clustSizeEq, 
+		     rangeN, 
+		     clustSizes, 
+		     p, 
+		     quiet = TRUE)
 { 
   if(!is.element(clustszind, c(1,2,3))) 
   { 
@@ -1483,7 +1717,20 @@ genMemSize<-function(clustszind, G, clustSizeEq, rangeN, clustSizes, p, quiet=TR
 #      for the i-th cluster
 # See documentation of genRandomClust for explanation of arguments:
 # covMethod, rangeVar, eps, quiet
-genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod, alphad, eta, rangeVar, eps=1.0e-10, quiet=TRUE)
+genNoisyMeanCov<-function(
+			  numNoisy, 
+			  mypi, 
+			  G, 
+			  numNonNoisy, 
+			  thetaMat, 
+			  s, 
+			  covMethod, 
+			  eigenvalue, 
+			  alphad, 
+			  eta, 
+			  rangeVar, 
+			  eps=1.0e-10, 
+			  quiet=TRUE)
 { 
   numNoisy<-as.integer(numNoisy)
   if(numNoisy<0 || !is.integer(numNoisy)) 
@@ -1533,7 +1780,10 @@ genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod
   p2<-numNoisy # number of noisy variables
   # Obtain the mean vector and covariance matrix of the mixture of
   # distributions sum_{k=1}^{G}mypi[k]*f_k(X).
-  tmp<-meanCovMixture(thetaMat, s, mypi)
+  tmp<-meanCovMixture(
+		      thetaMat = thetaMat, 
+		      s = s, 
+		      mypi = mypi)
   mu.noisy<-tmp$mu.mixture
   Sigma.noisy<-tmp$Sigma.mixture
   # Obtain the range of mu.noisy
@@ -1546,7 +1796,15 @@ genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod
   # Generate the covariance matrix of noisy variables
   low<-range.eg[1]; upp<-range.eg[2]; 
   # obtain covariance matrices
-  tmp<-genPositiveDefMat(p2, covMethod, alphad, eta, rangeVar, low, upp/low) 
+  tmp<-genPositiveDefMat(
+			 dim = p2, 
+			 covMethod = covMethod, 
+			 eigenvalue = eigenvalue,
+			 alphad = alphad, 
+			 eta = eta, 
+			 rangeVar = rangeVar, 
+			 lambdaLow = low, 
+			 ratioLambda = upp/low) 
   s.noisy<-tmp$Sigma # obtain covariance matrices
   p<-numNonNoisy+p2 # total number of variables
   # update the mean vectors and covariance matirces
@@ -1574,7 +1832,10 @@ genNoisyMeanCov<-function(numNoisy, mypi, G, numNonNoisy, thetaMat, s, covMethod
 # s -- array of covariance matrices. s[,,i] is the covariance matrix
 #      for the i-th cluster
 # mypi -- the proportions of cluster sizes. sum(mypi)=1.
-meanCovMixture<-function(thetaMat, s, mypi)
+meanCovMixture<-function(
+			 thetaMat, 
+			 s, 
+			 mypi)
 { 
   tmp<-which(mypi<0)
   if(length(tmp)>0)
@@ -1630,7 +1891,14 @@ meanCovMixture<-function(thetaMat, s, mypi)
 # numNoisy -- the number of noisy variables
 # quiet -- a flag to switch on/off the outputs of intermediate results.
 #      The default value is 'TRUE'.
-updateMeanCov<-function(rotateind, thetaMat, s, G, p, numNoisy, quiet=TRUE)
+updateMeanCov<-function(
+			rotateind, 
+			thetaMat, 
+			s, 
+			G, 
+			p, 
+			numNoisy, 
+			quiet=TRUE)
 { 
   if(!is.logical(rotateind))
   {
@@ -1659,7 +1927,7 @@ updateMeanCov<-function(rotateind, thetaMat, s, G, p, numNoisy, quiet=TRUE)
   if(!quiet)
   { cat(" *** Step 2.6:  Generate the numNonNoisy x numNonNoisy orthogonal matrix Q ***\n") }
   numNonNoisy<-p-numNoisy # the number of non-noisy variables
-  if(rotateind) { Q<-genOrthogonal(numNonNoisy) } 
+  if(rotateind) { Q<-genOrthogonal(dim = numNonNoisy) } 
   else { Q<-diag(numNonNoisy) }
   if(!quiet)
   { cat(" *** Step 2.7:  Obtain the rotated mean vectors and covariance matrices. The noisy variables will not be rotated. ***\n") 
@@ -1694,7 +1962,15 @@ updateMeanCov<-function(rotateind, thetaMat, s, G, p, numNoisy, quiet=TRUE)
 #      for the i-th cluster
 # size -- cluster sizes
 # quiet -- indicates if the intermediate results should be output.
-genData<-function(mem, N, G, p, muMat, SigmaArray, size, quiet=TRUE)
+genData<-function(
+		  mem, 
+		  N, 
+		  G, 
+		  p, 
+		  muMat, 
+		  SigmaArray, 
+		  size, 
+		  quiet=TRUE)
 { 
   if(length(unique(mem))!=G)
   { stop("The number of clusters obtained from the membership vector 'mem' is not equal to the specified number 'G' of clusters!\n")
@@ -1742,7 +2018,9 @@ genData<-function(mem, N, G, p, muMat, SigmaArray, size, quiet=TRUE)
 #   total number of non-outliers. If numOutlier is a real number greater than
 #   1, then we round numOutlier to an integer. 
 # y -- Nxp data matrix
-genOutliers<-function(numOutlier, y)
+genOutliers<-function(
+		      numOutlier, 
+		      y)
 { 
   if(numOutlier<0)
   { stop("Number of outliers should be positive!\n") }
@@ -1750,7 +2028,9 @@ genOutliers<-function(numOutlier, y)
   N<-nrow(y)
   p<-ncol(y)
   # obtain the number of outliers
-  nOut<-outlierSize(numOutlier, N)
+  nOut<-outlierSize(
+		    numOutlier = numOutlier, 
+		    N = N)
   if(nOut>0)
   { # Find the cooridinate-wise mean and sd of the data matrix y
     mu<-apply(y, 2, mean, na.rm=TRUE)
@@ -1828,10 +2108,30 @@ outlierSize<-function(numOutlier, N)
 #       and separation indices should be output to files.
 #       These inforamtion usually are useful to check the cluster
 #       structures. Hence, by default, 'outputEmpirical=TRUE'.
-outputLog<-function(b, fileName, alpha, sepVal, G, size,
-  N, p, numNoisy, noisySet, nOut, thetaMat, s, muMat, SigmaArray, Q, 
-  sepValMat, Jhat2, myprojDir, empProjDir, egvaluesMat, quiet=TRUE,
-  outputEmpirical=TRUE) 
+outputLog<-function(
+		    b, 
+		    fileName, 
+		    alpha, 
+		    sepVal, 
+		    G, 
+		    size,
+                    N, 
+		    p, 
+		    numNoisy, 
+		    noisySet, 
+		    nOut, 
+		    thetaMat, 
+		    s, 
+		    muMat, 
+		    SigmaArray, 
+		    Q, 
+                    sepValMat, 
+		    Jhat2, 
+		    myprojDir, 
+		    empProjDir, 
+		    egvaluesMat, 
+		    quiet = TRUE,
+                    outputEmpirical = TRUE) 
 { # output log information, e.g. mean vectors and covariance matrices.
   if(!quiet)
   { cat(" *** Step 2.11:  Output results ***\n") }
@@ -1841,20 +2141,51 @@ outputLog<-function(b, fileName, alpha, sepVal, G, size,
   write.table(tem,append=FALSE, file=logfileName,quote=FALSE,
     row.names=FALSE,col.names=FALSE)
   # output parameters
-  outputLogPar(logfileName,G,size,N,p,numNoisy,noisySet,nOut,alpha,
-               sepVal, egvaluesMat)
+  outputLogPar(
+	       logfileName = logfileName,
+	       G = G,
+	       size = size,
+	       N = N,
+	       p = p,
+	       numNoisy = numNoisy,
+	       noisySet = noisySet,
+	       nOut = nOut,
+	       alpha = alpha,
+               sepVal = sepVal, 
+	       egvaluesMat = egvaluesMat)
   # output Mean vectors and covariance matrices before rotation 
-  outputLogMeanCov(logfileName, G, thetaMat, s, flag=1)
+  outputLogMeanCov(
+		   logfileName = logfileName, 
+		   G = G, 
+		   thetaMat = thetaMat, 
+		   s = s, 
+		   flag = 1)
   # output rotation matrix
-  outputLogQ(logfileName, Q)
+  outputLogQ(
+	     logfileName = logfileName, 
+	     Q = Q)
   # output Mean vectors and covariance matrices after rotation 
-  outputLogMeanCov(logfileName, G, muMat, SigmaArray, flag=2)
+  outputLogMeanCov(
+		   logfileName = logfileName, 
+		   G = G, 
+		   thetaMat = muMat, 
+		   s = SigmaArray, 
+		   flag = 2)
   # output theoretical Separation index matrix and projection directions
-  outputLogSepProj(logfileName, G, sepValMat, myprojDir)
+  outputLogSepProj(
+		   logfileName = logfileName, 
+		   G = G, 
+		   sepValMat = sepValMat, 
+		   myprojDir = myprojDir)
   if(outputEmpirical)
   {
     # output empirical Separation index matrix and projection directions
-    outputLogSepProjData(logfileName,G,alpha,Jhat2,empProjDir)
+    outputLogSepProjData(
+			 logfileName = logfileName,
+			 G = G,
+			 alpha = alpha,
+			 Jhat2 = Jhat2,
+			 empProjDir = empProjDir)
   }
   tem<-paste("\n *********** end file ", datafileName, " **********\n", sep="")
 }
@@ -1873,8 +2204,18 @@ outputLog<-function(b, fileName, alpha, sepVal, G, size,
 # egvaluesMat -- 'numClust' by 'p' eigenvalue matrix. Each row contains the 
 #       'p' eigenvalues of a cluster, where 'numClust' is the number
 #       of clusters, 'p' is the number of variables
-outputLogPar<-function(logfileName,G,size,N,p,numNoisy,noisySet,nOut,alpha,
-  sepVal, egvaluesMat)
+outputLogPar<-function(
+		       logfileName,
+		       G,
+		       size,
+		       N,
+		       p,
+		       numNoisy,
+		       noisySet,
+		       nOut,
+		       alpha,
+                       sepVal, 
+		       egvaluesMat)
 { 
   if(!is.numeric(alpha)) { tt1<-alpha } 
   else { tt1<-round(alpha, 3) }
@@ -1924,7 +2265,12 @@ outputLogPar<-function(logfileName,G,size,N,p,numNoisy,noisySet,nOut,alpha,
 # s -- the array of covariance matrices 
 # flag -- flag =1 means before rotation and randomization
 #         flag =2 means after rotation and randomization
-outputLogMeanCov<-function(logfileName, G, thetaMat, s, flag=1)
+outputLogMeanCov<-function(
+			   logfileName, 
+			   G, 
+			   thetaMat, 
+			   s, 
+			   flag = 1)
 { p<-nrow(s[,,1])
   egvaluesMat<-matrix(0,nrow=G, ncol=p)
   rownames(egvaluesMat)<-paste("cluster", 1:G, sep="")
@@ -1969,7 +2315,9 @@ outputLogMeanCov<-function(logfileName, G, thetaMat, s, flag=1)
 # output rotation matrix
 # logfileName -- name of the logfile
 # Q -- the rotation matrix
-outputLogQ<-function(logfileName, Q)
+outputLogQ<-function(
+		     logfileName, 
+		     Q)
 { tem<-paste("\n *************************************************\n", sep="")
   write.table(tem,append=TRUE, file=logfileName,quote=FALSE,
     row.names=FALSE,col.names=FALSE)
@@ -1992,7 +2340,11 @@ outputLogQ<-function(logfileName, Q)
 # G -- the number of clusters
 # sepValMat -- the theoretical separation index matrix
 # myprojDir -- the theoretical projection direction
-outputLogSepProj<-function(logfileName, G, sepValMat, myprojDir)
+outputLogSepProj<-function(
+			   logfileName, 
+			   G, 
+			   sepValMat, 
+			   myprojDir)
 { tem<-paste("\n theoretical Separation index matrix >>\n")
   write.table(tem,append=TRUE, file=logfileName,quote=FALSE,
     row.names=FALSE,col.names=FALSE)
@@ -2029,7 +2381,12 @@ outputLogSepProj<-function(logfileName, G, sepValMat, myprojDir)
 # alpha -- the tuning parameter in the separation index
 # Jhat2 -- the empirical separation index matrix
 # empProjDir -- the empirical projection directions
-outputLogSepProjData<-function(logfileName,G,alpha, Jhat2,empProjDir)
+outputLogSepProjData<-function(
+			       logfileName,
+			       G,
+			       alpha, 
+			       Jhat2,
+			       empProjDir)
 { tem<-paste("\n empirical Separation index matrix (alpha=",alpha,")>>\n")
   write.table(tem,append=TRUE, file=logfileName,quote=FALSE,
     row.names=FALSE,col.names=FALSE)
@@ -2063,7 +2420,11 @@ outputLogSepProjData<-function(logfileName,G,alpha, Jhat2,empProjDir)
 # fileName -- the first part of the name of the data set
 # y -- Nxp data matrix
 # p -- the total number of variables
-outputData<-function(b, fileName, y, p, outputDatFlag=TRUE)
+outputData<-function(b, 
+		     fileName, 
+		     y, 
+		     p, 
+		     outputDatFlag = TRUE)
 { tem<-paste("x", 1:p, sep="")
   if(outputDatFlag)
   { datafileName<-paste(fileName, "_", b, ".dat", sep="")
@@ -2103,13 +2464,13 @@ outputData<-function(b, fileName, y, p, outputDatFlag=TRUE)
 #      can give reasonable variability of the diameters of clusters.
 # dim -- the dimension of this positive definite matrix
 genPositiveDefMat<-function(dim, 
-                            covMethod=c("eigen", "onion", "c-vine", "unifcorrmat"), 
-                            eigenvalue = NULL,
-                            alphad=1, 
-                            eta=1,
-                            rangeVar=c(1,10), 
-                            lambdaLow=1, 
-                            ratioLambda=10)
+                            covMethod = c("eigen", "onion", "c-vine", "unifcorrmat"), 
+                            eigenvalue  =  NULL,
+                            alphad = 1, 
+                            eta = 1,
+                            rangeVar = c(1,10), 
+                            lambdaLow = 1, 
+                            ratioLambda = 10)
 { 
   covMethod<-match.arg(arg=covMethod, choices=c("eigen", "onion", "c-vine", "unifcorrmat"))
   
@@ -2147,7 +2508,7 @@ genPositiveDefMat<-function(dim,
     diag(u)<-egvalues #the diagonal elements of u are positive
     Sigma<-u
     if(dim>1)
-    { Q<-genOrthogonal(dim) # generate an orthogonal matrix 
+    { Q<-genOrthogonal(dim = dim) # generate an orthogonal matrix 
       Sigma <- crossprod(Q * sqrt(egvalues)) # the final positive definite matrix
       #Sigma<-Q%*%u%*%t(Q) # the final positive definite matrix
     }
@@ -2158,7 +2519,8 @@ genPositiveDefMat<-function(dim,
     # Reference: 
     # Joe H (2006). Generating random correlation matrices based on partial
     # correlations. J. Mult. Anal. Vol. 97, 2177--2189
-    rr<-rcoronion(dim,eta)
+    rr<-rcoronion(d = dim,
+		  eta = eta)
     sigma2<-runif(dim, min=rangeVar[1], max=rangeVar[2])
     if(dim>1) { dd<-diag(sqrt(sigma2)) }
     else { dd<-sqrt(sigma2) }
@@ -2172,7 +2534,8 @@ genPositiveDefMat<-function(dim,
     # Reference: 
     # Joe H (2006). Generating random correlation matrices based on partial
     # correlations. J. Mult. Anal. Vol. 97, 2177--2189
-    rr<-rcorcvine(dim, eta)
+    rr<-rcorcvine(d = dim, 
+		  eta = eta)
     sigma2<-runif(dim, min=rangeVar[1], max=rangeVar[2])
     if(dim>1) { dd<-diag(sqrt(sigma2)) }
     else { dd<-sqrt(sigma2) }
@@ -2185,7 +2548,9 @@ genPositiveDefMat<-function(dim,
     # Reference: 
     # Joe H (2006). Generating random correlation matrices based on partial
     # correlations. J. Mult. Anal. Vol. 97, 2177--2189
-    rr<-rcorrmatrix(dim, alphad=1)
+    rr<-rcorrmatrix(
+		    d = dim, 
+		    alphad = 1)
     sigma2<-runif(dim, min=rangeVar[1], max=rangeVar[2])
     if(dim>1) { dd<-diag(sqrt(sigma2)) }
     else { dd<-sqrt(sigma2) }
@@ -2200,7 +2565,7 @@ genPositiveDefMat<-function(dim,
 # dim -- dimension
 genOrthogonal<-function(dim)
 { 
-  Q<-MOrthogonal(runif(dim))
+  Q<-MOrthogonal(M = runif(dim))
   return(Q)
 }
 
@@ -2211,7 +2576,7 @@ MOrthogonal<-function(M)
 {
   # can set the parameter "tol" of "qr" to decide how small value should be 0
   tmp<-qr(M)
-  Q<-qr.Q(tmp,complete=TRUE)
+  Q<-qr.Q(tmp, complete = TRUE)
   if(is.vector(M)) { if(Q[1]*M[1]<0) Q<- -Q }
   else { if(Q[1,1]*M[1,1]<0) Q<- - Q }
   return(Q)
@@ -2233,10 +2598,16 @@ MOrthogonal<-function(M)
 # A2 -- the upper bound of A. 
 # See documentation of genRandomClust for explanation of arguments:
 # iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet
-getA2<-function(G, sArray, sepVal, A2, 
-                iniProjDirMethod=c("SL","naive"), 
-                projDirMethod=c("newton", "fixedpoint"), 
-                alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+getA2<-function(G, 
+		sArray, 
+		sepVal, 
+		A2, 
+                iniProjDirMethod = c("SL", "naive"), 
+                projDirMethod = c("newton", "fixedpoint"), 
+                alpha = 0.05, 
+		ITMAX = 20, 
+		eps = 1.0e-10, 
+		quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -2272,7 +2643,9 @@ getA2<-function(G, sArray, sepVal, A2,
   numNonNoisy<-ncol(sArray[,,1]) 
   # get the vertices of the simplex in numNonNoisy dimensional space
   # edge lengths of the simplex are all equal to 2
-  vertex<-genShiftedVertexes(G, numNonNoisy) 
+  vertex<-genShiftedVertexes(
+			     G = G, 
+			     numNonNoisy = numNonNoisy) 
   d<-as.matrix(dist(vertex))
   myS<-1:G
   while(length(myS)>1)
@@ -2287,15 +2660,36 @@ getA2<-function(G, sArray, sepVal, A2,
     { sj<-sArray[,,j]
       vertexj<-vertex[j,]; 
       # get interval [A1, A2] so that J^*_{ij}(A1)<0 and J^*_{ij}(A2)>0
-      tmp<-getAInterval(vertexi,vertexj,si,sj,A2,sepVal,
-                        iniProjDirMethod, projDirMethod, alpha,ITMAX,
-                        eps, quiet)
+      tmp<-getAInterval(
+			vertexi = vertexi,
+			vertexj = vertexj,
+			si = si,
+			sj = sj,
+			A2 = A2,
+			sepVal = sepVal,
+                        iniProjDirMethod = iniProjDirMethod, 
+			projDirMethod = projDirMethod, 
+			alpha = alpha,
+			ITMAX = ITMAX,
+                        eps = eps, 
+			quiet = quiet)
       A1<-tmp$A1
       A2<-tmp$A2
       # find the value of A so that the separation index J^*_{ij}=sepVal.
-      tmpA<-getA(A1, A2, vertexi, vertexj, si, sj, sepVal, 
-                 iniProjDirMethod, projDirMethod, alpha, ITMAX,
-                 eps, quiet)
+      tmpA<-getA(
+		 A1 = A1, 
+		 A2 = A2, 
+		 vertex1 = vertexi, 
+		 vertex2 = vertexj, 
+		 Sigma1 = si, 
+		 Sigma2 = sj, 
+		 sepVal = sepVal, 
+                 iniProjDirMethod = iniProjDirMethod, 
+		 projDirMethod = projDirMethod, 
+		 alpha = alpha, 
+		 ITMAX = ITMAX,
+                 eps = eps, 
+		 quiet = quiet)
       if(minA<tmpA) { minA<-tmpA }
     }
   }
@@ -2312,9 +2706,19 @@ getA2<-function(G, sArray, sepVal, A2,
 # sepVal -- the desired separation index between cluster i and cluster j 
 # See documentation of genRandomClust for explanation of arguments:
 # iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet
-getAInterval<-function(vertexi, vertexj, si, sj, A2, sepVal,
-                       iniProjDirMethod, projDirMethod, alpha=0.05, ITMAX=20,
-                       eps=1.0e-10, quiet=TRUE)
+getAInterval<-function(
+		       vertexi, 
+		       vertexj, 
+		       si, 
+		       sj, 
+		       A2, 
+		       sepVal,
+                       iniProjDirMethod, 
+		       projDirMethod, 
+		       alpha = 0.05, 
+		       ITMAX = 20,
+                       eps = 1.0e-10, 
+		       quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -2344,9 +2748,19 @@ getAInterval<-function(vertexi, vertexj, si, sj, A2, sepVal,
   A1<-min(tmpsi, tmpsj, na.rm=TRUE)
   # get A1 so that the separation index between cluster i and j <0.
   while(1)
-  { tmp<-funSepVal(A1, vertexi, vertexj, si, sj, sepVal, 
-                   iniProjDirMethod, projDirMethod, alpha, 
-                   ITMAX, eps, quiet)
+  { tmp<-funSepVal(
+		   A = A1, 
+		   vertex1 = vertexi, 
+		   vertex2 = vertexj, 
+		   Sigma1 = si, 
+		   Sigma2 = sj, 
+		   sepVal = sepVal, 
+                   iniProjDirMethod = iniProjDirMethod, 
+		   projDirMethod = projDirMethod, 
+		   alpha = alpha, 
+                   ITMAX = ITMAX, 
+		   eps = eps, 
+		   quiet = quiet)
     if(tmp>0) { A1<-A1/2 } else { break }
   }
 
@@ -2355,9 +2769,19 @@ getAInterval<-function(vertexi, vertexj, si, sj, A2, sepVal,
   tmpsj<-max(diag(sj), na.rm=TRUE)
   mystep<-max(tmpsi, tmpsj, na.rm=TRUE)
   while(1)
-  { tmp2<-funSepVal(A2, vertexi, vertexj, si, sj, sepVal, 
-                    iniProjDirMethod, projDirMethod, alpha, 
-                    ITMAX, eps, quiet)
+  { tmp2<-funSepVal(
+		    A = A2, 
+		    vertex1 = vertexi, 
+		    vertex2 = vertexj, 
+		    Sigma1 = si, 
+		    Sigma2 = sj, 
+		    sepVal = sepVal, 
+                    iniProjDirMethod = iniProjDirMethod, 
+		    projDirMethod = projDirMethod, 
+		    alpha = alpha, 
+                    ITMAX = ITMAX, 
+		    eps = eps, 
+		    quiet = quiet)
     if(tmp2<0) { A2<-A2+mystep } else { break }
   }
   return(list(A1=A1, A2=A2))
@@ -2374,10 +2798,20 @@ getAInterval<-function(vertexi, vertexj, si, sj, A2, sepVal,
 # sepVal -- the desired separation index between cluster 1 and cluster i 
 # See documentation of genRandomClust for explanation of arguments:
 # iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet
-getA<-function(A1, A2, vertex1, vertex2, Sigma1, Sigma2, 
-               sepVal, iniProjDirMethod=c("SL", "naive"),
-               projDirMethod=c("newton", "fixedpoint"), alpha=0.05, ITMAX=20,
-               eps=1.0e-10, quiet=TRUE)
+getA<-function(
+	       A1, 
+	       A2, 
+	       vertex1, 
+	       vertex2, 
+	       Sigma1, 
+	       Sigma2, 
+               sepVal, 
+	       iniProjDirMethod = c("SL", "naive"),
+               projDirMethod = c("newton", "fixedpoint"), 
+	       alpha = 0.05, 
+	       ITMAX = 20,
+               eps = 1.0e-10, 
+	       quiet = TRUE)
 { 
 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
@@ -2410,12 +2844,21 @@ getA<-function(A1, A2, vertex1, vertex2, Sigma1, Sigma2,
   class(newfit)<-"try-error"
   
   newfit<-try(
-         tmp<-uniroot(f=funSepVal, lower=A1, upper=A2, 
-               vertex1=vertex1, vertex2=vertex2, Sigma1=Sigma1, 
-               Sigma2=Sigma2, sepVal=sepVal, 
-               iniProjDirMethod=iniProjDirMethod,
-               projDirMethod=projDirMethod, alpha=alpha, 
-               ITMAX=ITMAX, eps=eps, quiet=quiet)
+         tmp<-uniroot(
+		      f = funSepVal, 
+		      lower = A1, 
+		      upper = A2, 
+                      vertex1 = vertex1, 
+		      vertex2 = vertex2, 
+		      Sigma1 = Sigma1, 
+                      Sigma2 = Sigma2, 
+		      sepVal = sepVal, 
+                      iniProjDirMethod = iniProjDirMethod,
+                      projDirMethod = projDirMethod, 
+		      alpha = alpha, 
+                      ITMAX = ITMAX, 
+		      eps = eps, 
+		      quiet = quiet)
   )
   if(sum(class(newfit)=="try-error", na.rm=TRUE))
   { warning("Could not find suitable upper bound of 'myc'!\n 'myc' is set to be 'A2'!\n")
@@ -2442,11 +2885,19 @@ getA<-function(A1, A2, vertex1, vertex2, Sigma1, Sigma2,
 # sepVal -- the given separation index
 # See documentation of genRandomClust for explanation of arguments:
 # iniProjDirMethod, projDirMethod, alpha, ITMAX, eps, quiet
-funSepVal<-function(A, vertex1, vertex2, 
-                    Sigma1, Sigma2, sepVal, 
-                    iniProjDirMethod=c("SL", "naive"), 
-                    projDirMethod=c("newton", "fixedpoint"), 
-                    alpha=0.05, ITMAX=20, eps=1.0e-10, quiet=TRUE)
+funSepVal<-function(
+		    A, 
+		    vertex1, 
+		    vertex2, 
+                    Sigma1, 
+		    Sigma2, 
+		    sepVal, 
+                    iniProjDirMethod = c("SL", "naive"), 
+                    projDirMethod = c("newton", "fixedpoint"), 
+                    alpha = 0.05, 
+		    ITMAX = 20, 
+		    eps = 1.0e-10, 
+		    quiet = TRUE)
 { 
   iniProjDirMethod<-match.arg(arg=iniProjDirMethod, choices=c("SL", "naive"))
   projDirMethod<-match.arg(arg=projDirMethod, choices=c("newton", "fixedpoint"))
@@ -2467,11 +2918,26 @@ funSepVal<-function(A, vertex1, vertex2,
   mu1<-A*vertex1
   mu2<-A*vertex2
   # get the initial projection direction 
-  iniProjDir<-getIniProjDirTheory(mu1, Sigma1, mu2, Sigma2, 
-                            iniProjDirMethod, eps)
+  iniProjDir<-getIniProjDirTheory(
+				  mu1 = mu1, 
+				  Sigma1 = Sigma1, 
+				  mu2 = mu2, 
+				  Sigma2 = Sigma2, 
+                                  iniProjDirMethod = iniProjDirMethod, 
+				  eps = eps,
+				  quiet = quiet)
   # get the projection direction
-  tmpa<-projDirTheory(iniProjDir, mu1, Sigma1, mu2, Sigma2, 
-                         projDirMethod, alpha, ITMAX, eps, quiet)
+  tmpa<-projDirTheory(
+		      iniProjDir = iniProjDir, 
+		      mu1 = mu1, 
+		      Sigma1 = Sigma1, 
+		      mu2 = mu2, 
+		      Sigma2 = Sigma2, 
+                      projDirMethod = projDirMethod, 
+		      alpha = alpha, 
+		      ITMAX = ITMAX, 
+		      eps = eps, 
+		      quiet = quiet)
   a<-tmpa$projDir
   # get separation index
   tmpsepVal<-tmpa$sepVal
