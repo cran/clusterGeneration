@@ -1,3 +1,6 @@
+v1.3.7 >>>> Dec. 12, 2020
+# (1) added function "genOrthogonal" to export list
+#
 v1.3.6 >>>> Nov. 21, 2020
 # (1) added "na.rm=TRUE" when calling 'sum', 'max'
 # (2) when call a function, explicitly call its input
