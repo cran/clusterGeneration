@@ -92,7 +92,7 @@ The magnification to be used for main titles relative
 to the current setting of 'cex' (see \code{par}).
   }
   \item{lwd}{
-The line width, a \_positive\_ number, defaulting to '1' (see \code{par}).
+The line width, a positive number, defaulting to '1' (see \code{par}).
   }
   \item{lty1}{
   Line type for cluster 1 (see \code{par}).

@@ -954,9 +954,10 @@ genMeanCov<-function(numNonNoisy,
     za<-qnorm(1-alpha/2)
     A2<-(1+sepVal)*za*(s1+s2)/(2*(1-sepVal))
     A2<-A2+1
-    for(gg in 1:G)
-    { eg<-eigen(s[,,gg])$values
-    }
+    # commented out the following for loop
+    #for(gg in 1:G)
+    #{ eg<-eigen(s[,,gg])$values
+    #}
     tmp<-getA2(
 	       G = G, 
 	       sArray = s, 
@@ -1448,7 +1449,7 @@ findNeighbors<-function(
   { 
     stop("The separation index matrix 'sepValMat' should contains at least 1 element!\n")
   }
-  pos<-which(tmp< -1 || tmp>1)
+  pos<-which(tmp< -1 | tmp>1)
   if(length(pos)>0)
   {
       stop("The element of the separation index matrix 'sepValMat' should be between [-1, 1]!\n")

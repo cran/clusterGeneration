@@ -232,7 +232,7 @@ Hence, by default, \code{outputEmpirical=TRUE}.
   }
   \item{outputInfo}{
 Indicates if theoretical and empirical separation information data frames 
-should be output to a file with format \file{[fileName]\_info.log}.
+should be output to a file with format \code{[fileName]_info.log}.
   }
 }
 \details{
@@ -265,7 +265,7 @@ an interval specified by the argument \code{rangeVar}. The covariance matrix
 For each data set generated, the function \code{simClustDesign} outputs
 four files: data file, log file, membership file, and noisy set file. 
 All four files have the same format: \cr
-\file{[fileName]J[j]G[g]v[p1]nv[p2]out[numOutlier]\_[numReplicate].[extension]} 
+\code{[fileName]J[j]G[g]v[p1]nv[p2]out[numOutlier]_[numReplicate].[extension]} 
 \cr
 where \file{extension} can be \file{dat}, \file{log}, \file{mem}, or 
 \file{noisy}. \sQuote{J} indicates separation index, with \sQuote{j} 
@@ -328,7 +328,7 @@ Median separation indices of the clusters to their neighbors.
   }
   \item{Column 7:}{
 Data file names with format 
-\file{[fileName]J[j]G[g]v[p1]nv[p2]out[numOutlier]\_[numReplicate]} (see details).
+\code{[fileName]J[j]G[g]v[p1]nv[p2]out[numOutlier]_[numReplicate]} (see details).
   }
 
   The function also returns three lists: \code{datList}, \code{memList}, and \code{noisyList}.

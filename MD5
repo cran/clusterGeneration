@@ -1,7 +1,7 @@
-ac3b5e8718aaab627f6c86e311245450 *DESCRIPTION
+8017563d58121c756acc6340b2ffc4f4 *DESCRIPTION
 526bd5b755151cb6edb2821f030d03f0 *NAMESPACE
-be9e0b655195c8c1b4f95307203b3451 *NEWS
-fcabefb90e91ed8fd7215195574559bc *R/genCluster.R
+66b877cbce90f961b4ef51ca24e70c15 *NEWS
+d8dec7e3e3b1a18b3fb26758c9221b09 *R/genCluster.R
 b62e0df5c5b0c10f01b99c4d5b41b5e1 *R/hjrancor.R
 124087eaa0f3a417b7fb5e533a5d54a8 *R/rcvine.R
 bdd1569ce6f6b4a30892d55cd24c39c6 *R/ronion.R
@@ -10,12 +10,12 @@ bdd1569ce6f6b4a30892d55cd24c39c6 *R/ronion.R
 f4deac05d4eff8b05d94efbd0db8d7c3 *R/visual.R
 4ef225fefdb2a66fb7248ea071f2803f *man/genOrthogonal.Rd
 675b1e1f67a8f7e31a5322d6cf718809 *man/genPositiveDefMat.Rd
-b5a4908f7724eaafeda220ce7d2444cf *man/genRandomClust.Rd
+a8f5002a0b85837ab38d698de590a82e *man/genRandomClust.Rd
 07cb175c7cd51fd1b66dc051e50a79ca *man/getSepProj.Rd
 b53a12dde6aa584edf3336077d441b80 *man/nearestNeighborSepVal.Rd
-de8c2460d3695843fbd6113e941226c0 *man/plot1DProjection.Rd
-9720874dcd751b4e5edf43bbad83cb87 *man/plot2DProjection.Rd
+efcc5a8d980cf4fad81290a9e7d21485 *man/plot1DProjection.Rd
+bcf84e70579d6882f0997e3de7ec35c9 *man/plot2DProjection.Rd
 b40674b5afdc5e8a027d0a7d31e5591d *man/rcorrmatrix.Rd
 0057391007ab673f11e1e89ceab0c296 *man/sepIndex.Rd
-e1ceb2cd5b1c5c4370345ae60a45670c *man/simClustDesign.Rd
+760d83f4c8b7d539d970cab41301d7f6 *man/simClustDesign.Rd
 799aa8fce3777eaee351dd98513997c5 *man/viewClusters.Rd

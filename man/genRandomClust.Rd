@@ -225,7 +225,7 @@ Hence, by default, \code{outputEmpirical=TRUE}.
   }
   \item{outputInfo}{
 Indicates if theoretical and empirical separation information data frames 
-should be output to a file with format \file{[fileName]\_info.log}.
+should be output to a file with format \code{[fileName]_info.log}.
   }
 }
 \details{
@@ -256,7 +256,7 @@ an interval specified by the argument \code{rangeVar}. The covariance matrix
 
 For each data set generated, the function \code{genRandomClust} outputs
 four files: data file, log file, membership file, and noisy set file. 
-All four files have the same format: \file{[fileName]\_[i].[extension]}, 
+All four files have the same format: \code{[fileName]_[i].[extension]}, 
 where \eqn{i} indicates the replicate number, and \file{extension} can be 
 \file{dat}, \file{log}, \file{mem}, and \file{noisy}. 
 
@@ -324,7 +324,7 @@ Separation indices of the clusters to their farthest neighbors.
 Median separation indices of the clusters to their neighbors.
   }
   \item{Column 7:}{
-Data file names with format \file{[fileName]\_[i]}, where \eqn{i} indicates 
+Data file names with format \code{[fileName]_[i]}, where \eqn{i} indicates 
 the replicate number.
   }
 
